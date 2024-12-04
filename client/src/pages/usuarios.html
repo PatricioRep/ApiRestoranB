@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+            z-index: 50;
+        }
+        .alert {
+            background-color: #38a169;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .alert svg {
+            width: 24px;
+            height: 24px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="overlay" class="overlay">
+        <div class="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m0 0l2 2m-6-2v6M12 8v6m0 6v2m0-2H4" />
+            </svg>
+            <span>Operación exitosa.</span>
+        </div>
+    </div>
+
+    <div class="absolute top-4 right-4">
+        <button id="logoutButton" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded">
+            Salir de sesión
+        </button>
+    </div>
+    
+    <div class="absolute top-4 left-4">
+        <button id="volverButton" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
+            Volver
+        </button>
+    </div>
+
+    <div class="container mx-auto py-8">
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-xl font-bold mb-4">Gestión de Usuarios</h2>
+            <div id="usuariosContainer">
+                <!-- La tabla de usuarios se cargará aquí dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function cargarUsuarios() {
+            const container = document.getElementById('usuariosContainer');
+            container.innerHTML = ''; // Limpiar contenido previo
+
+            try {
+                const response = await fetch('http://localhost:5000/api/users');
+                if (!response.ok) {
+                    throw new Error(`Error al obtener los usuarios: ${response.statusText}`);
+                }
+
+                const usuarios = await response.json();
+
+                if (usuarios.length === 0) {
+                    container.innerHTML = `<p class="text-gray-700">No hay usuarios para mostrar.</p>`;
+                } else {
+                    const table = document.createElement('table');
+                    table.className = 'min-w-full bg-white border';
+                    table.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2 border-b">Nombre</th>
+                                <th class="px-4 py-2 border-b">Correo</th>
+                                <th class="px-4 py-2 border-b">Perfil</th>
+                                <th class="px-4 py-2 border-b">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${usuarios.map(usuario => `
+                                <tr data-id="${usuario._id}">
+                                    <td class="px-4 py-2 border-b">${usuario.nombre}</td>
+                                    <td class="px-4 py-2 border-b">${usuario.email}</td>
+                                    <td class="px-4 py-2 border-b">${usuario.perfil}</td>
+                                    <td class="px-4 py-2 border-b flex gap-2">
+                                        <button class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600" title="Borrar" onclick="eliminarUsuario('${usuario._id}')">
+                                            Borrar
+                                        </button>
+                                        <button class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600" title="Subir de rango" onclick="ascenderUsuario('${usuario._id}')">
+                                            Subir de rango
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    `;
+                    container.appendChild(table);
+                }
+            } catch (error) {
+                console.error('Error al cargar usuarios:', error);
+                container.innerHTML = `<p class="text-red-500">Error al cargar los usuarios.</p>`;
+            }
+        }
+
+        async function eliminarUsuario(id) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/users/${id}`, {
+                    method: 'DELETE',
+                });
+
+                if (response.ok) {
+                    mostrarAlerta('Usuario eliminado exitosamente.');
+                    cargarUsuarios(); // Recargar usuarios después de eliminar
+                } else {
+                    const result = await response.json();
+                    alert(`Error: ${result.message}`);
+                }
+            } catch (error) {
+                console.error('Error al eliminar usuario:', error);
+            }
+        }
+
+        async function ascenderUsuario(id) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/users/${id}/promote`, {
+                    method: 'PUT',
+                });
+
+                if (response.ok) {
+                    mostrarAlerta('Usuario ascendido a locatario exitosamente.');
+                    cargarUsuarios(); // Recargar usuarios después de ascender
+                } else {
+                    const result = await response.json();
+                    alert(`Error: ${result.message}`);
+                }
+            } catch (error) {
+                console.error('Error al ascender usuario:', error);
+            }
+        }
+
+        function mostrarAlerta(mensaje) {
+            const overlay = document.getElementById('overlay');
+            overlay.querySelector('span').textContent = mensaje;
+            overlay.style.display = 'flex'; // Mostrar alerta
+            setTimeout(() => {
+                overlay.style.display = 'none'; // Ocultar alerta después de 3 segundos
+            }, 3000);
+        }
+
+        document.getElementById('volverButton').addEventListener('click', () => {
+            window.location.href = 'admin.html';
+        });
+
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = 'index.html';
+        });
+
+        cargarUsuarios();
+    </script>
+</body>
+</html>

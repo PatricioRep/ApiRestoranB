@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Local</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto py-8">
+        <div class="bg-white shadow rounded-lg p-6 max-w-md mx-auto">
+            <h2 class="text-xl font-bold mb-4">Crear un Local</h2>
+            <form id="crearLocalForm">
+                <div class="mb-4">
+                    <label for="nombreLocal" class="block text-gray-700 font-bold">Nombre del Local</label>
+                    <input type="text" id="nombreLocal" class="w-full border rounded px-3 py-2" placeholder="Nombre del local" required>
+                </div>
+                <div class="mb-4">
+                    <label for="region" class="block text-gray-700 font-bold">Región</label>
+                    <input type="text" id="region" class="w-full border rounded px-3 py-2" placeholder="Región" required>
+                </div>
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                    Guardar Local
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("crearLocalForm").addEventListener("submit", (event) => {
+            event.preventDefault();
+            const nombreLocal = document.getElementById("nombreLocal").value;
+            const region = document.getElementById("region").value;
+
+            console.log("Local creado:", { nombreLocal, region });
+            alert(`Local "${nombreLocal}" en la región "${region}" creado exitosamente.`);
+            window.location.href = "locatario.html"; // Redirigir a la página de locatario
+        });
+    </script>
+</body>
+</html>

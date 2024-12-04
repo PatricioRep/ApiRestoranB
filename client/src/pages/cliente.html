@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página de Cliente</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="absolute top-4 right-4">
+        <button id="logoutButton" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded">
+            Salir de sesión
+        </button>
+    </div>
+
+    <div class="container mx-auto py-8">
+        <div class="grid grid-cols-4 sm:grid-cols-12 gap-6 px-4">
+            <div class="col-span-4 sm:col-span-3">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <div class="flex flex-col items-center">
+                        <!-- Reemplazo de la imagen de perfil con el ícono de usuario -->
+                        <div class="w-32 h-32 bg-gray-300 rounded-full mb-4 flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 text-gray-600">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                            </svg>
+                        </div>
+                        <h1 class="text-xl font-bold" id="nombreUsuario">Patricio</h1> <!-- Nombre fijo "Patricio" -->
+                        <p class="text-gray-700" id="rolUsuario">Cliente</p>
+                        <div class="mt-6 flex flex-wrap gap-4 justify-center">
+                            <a href="#" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">Contactar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-span-4 sm:col-span-9">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h2 class="text-xl font-bold mb-4">Mis reseñas</h2>
+                    <div id="reseñasContainer">
+                        <!-- Las reseñas se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Decodificar el token JWT para extraer la información del usuario (si aplica)
+        function obtenerDatosUsuarioDesdeToken() {
+            const token = localStorage.getItem('token');
+            if (!token) return null;
+
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+
+                return JSON.parse(jsonPayload);
+            } catch (error) {
+                console.error('Error al decodificar el token:', error);
+                return null;
+            }
+        }
+
+        // Función para manejar el botón de salir de sesión
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = 'index.html';
+        });
+
+        // Cargar datos del usuario desde el token
+        function cargarDatosUsuario() {
+            const datosUsuario = obtenerDatosUsuarioDesdeToken();
+            if (datosUsuario) {
+                document.getElementById('nombreUsuario').textContent = datosUsuario.nombre || 'Patricio';
+                document.getElementById('rolUsuario').textContent = datosUsuario.perfil || 'Cliente';
+                cargarReseñas(datosUsuario.idUsuario); // Cargar reseñas basadas en idUsuario
+            } else {
+                // Si no hay token, muestra un mensaje de error o simula un usuario
+                document.getElementById('reseñasContainer').innerHTML = `<p class="text-red-500">Error: No se pudo cargar el usuario.</p>`;
+            }
+        }
+
+        // Función para cargar las reseñas del usuario
+        async function cargarReseñas(idUsuario) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/comments/user/${idUsuario}`);
+                const reseñas = await response.json();
+
+                const container = document.getElementById('reseñasContainer');
+
+                if (reseñas.length === 0) {
+                    // Si no hay reseñas, muestra el mensaje clickeable
+                    container.innerHTML = `
+                        <p class="text-blue-600 text-lg font-medium cursor-pointer hover:underline" onclick="window.location.href='reseña.html'">
+                            No has hecho reseñas aún...
+                        </p>
+                    `;
+                } else {
+                    // Si hay reseñas, muestra una tabla
+                    const table = document.createElement('table');
+                    table.className = 'min-w-full bg-white border';
+                    table.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2 border-b">Nombre del Local</th>
+                                <th class="px-4 py-2 border-b">Comentario</th>
+                                <th class="px-4 py-2 border-b">Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${reseñas.map(reseña => `
+                                <tr>
+                                    <td class="px-4 py-2 border-b">${reseña.nombreLocal}</td>
+                                    <td class="px-4 py-2 border-b">${reseña.comentario}</td>
+                                    <td class="px-4 py-2 border-b">${new Date(reseña.fecha).toLocaleDateString()}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    `;
+                    container.appendChild(table);
+                }
+            } catch (error) {
+                console.error('Error al cargar reseñas:', error);
+                document.getElementById('reseñasContainer').innerHTML = `<p class="text-red-500">Error al cargar reseñas.</p>`;
+            }
+        }
+
+        cargarDatosUsuario();
+    </script>
+</body>
+</html>

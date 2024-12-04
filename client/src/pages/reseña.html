@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elegir Local para Reseña</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: transform 0.2s;
+            background-color: #fff;
+        }
+        .card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .circle-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 16px;
+            transition: transform 0.2s;
+        }
+        .circle-button:hover {
+            transform: scale(1.1);
+        }
+        .review-container {
+            margin-top: 20px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+        .submit-button, .back-button {
+            margin-top: 10px;
+            background-color: #4299e1;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .submit-button:hover, .back-button:hover {
+            background-color: #3182ce;
+        }
+        .alert {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #38a169;
+            color: white;
+            border-radius: 5px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .alert svg {
+            width: 20px;
+            height: 20px;
+        }
+        .selected-icon {
+            margin-bottom: 10px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
+    <!-- Botón para regresar -->
+    <button class="back-button" onclick="volver()">Volver</button>
+
+    <!-- Contenedor de cartas de locales -->
+    <div id="localCardsContainer" class="mt-4 w-4/5 space-y-4">
+        <div class="card">
+            <button class="circle-button bg-blue-500 hover:bg-blue-600 text-white" onclick="selectLocal('Zangucheria Esteban')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 12l7-7 7 7M5 12v7m0 0h14m-14 0h14m-14-7v7m14-7v7m-14 0h14m-14-7v7" />
+                </svg>
+            </button>
+            <span class="text-lg font-medium">Zangucheria Esteban</span>
+        </div>
+
+        <div class="card">
+            <button class="circle-button bg-green-500 hover:bg-green-600 text-white" onclick="selectLocal('Tia Rosita')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 4.5V7a2 2 0 01-2 2h-5a2 2 0 01-2-2V4.5a2 2 0 011.414-1.914M8.5 10h7" />
+                </svg>
+            </button>
+            <span class="text-lg font-medium">Tia Rosita</span>
+        </div>
+
+        <div class="card">
+            <button class="circle-button bg-red-500 hover:bg-red-600 text-white" onclick="selectLocal('La Milanesa')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3L4.5 12h9L9.75 3zm0 0v18m0-18h9l-5.25 9h-9m14.25 9h-5.25m0 0L9.75 3" />
+                </svg>
+            </button>
+            <span class="text-lg font-medium">La Milanesa</span>
+        </div>
+    </div>
+
+    <!-- Contenedor para reseña -->
+    <div id="reviewContainer" class="review-container">
+        <div id="selectedIconContainer" class="selected-icon"></div>
+        <textarea id="comentarioInput" placeholder="Rellena tu reseña!!" class="border rounded w-80 p-2 mb-4"></textarea>
+        <button class="submit-button" onclick="submitReview()">Subir reseña</button>
+    </div>
+
+    <!-- Popup de confirmación -->
+    <div id="successAlert" class="alert flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+        <span>Reseña subida exitosamente</span>
+    </div>
+
+    <script>
+        let localSeleccionado = '';
+
+        function selectLocal(nombreLocal) {
+            localSeleccionado = nombreLocal;
+            document.getElementById('localCardsContainer').style.display = 'none';
+            document.getElementById('reviewContainer').style.display = 'flex';
+        }
+
+        function volver() {
+            window.location.href = 'cliente.html';
+        }
+
+        function obtenerIdUsuarioDesdeToken() {
+            const token = localStorage.getItem('token');
+            if (!token) return null;
+
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = JSON.parse(atob(base64));
+                return jsonPayload.idUsuario; // Extraer idUsuario
+            } catch (error) {
+                console.error('Error al decodificar el token:', error);
+                return null;
+            }
+        }
+
+        async function submitReview() {
+            const comentario = document.getElementById('comentarioInput').value;
+            const idUsuario = obtenerIdUsuarioDesdeToken();
+
+            if (!comentario || !localSeleccionado || !idUsuario) {
+                alert('Por favor completa todos los campos.');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5000/api/comments/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        idUsuario,
+                        comentario,
+                        nombreLocal: localSeleccionado,
+                    }),
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    mostrarAlerta();
+                } else {
+                    console.error('Error al enviar reseña:', result);
+                }
+            } catch (error) {
+                console.error('Error en la solicitud:', error);
+            }
+        }
+
+        function mostrarAlerta() {
+            const alert = document.getElementById('successAlert');
+            alert.style.display = 'flex';
+            setTimeout(() => {
+                alert.style.display = 'none';
+                volver();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
