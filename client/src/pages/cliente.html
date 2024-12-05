@@ -6,40 +6,54 @@
     <title>Página de Cliente</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-200"> <!-- Fondo gris claro -->
     <div class="absolute top-4 right-4">
         <button id="logoutButton" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded">
             Salir de sesión
         </button>
     </div>
 
-    <div class="container mx-auto py-8">
-        <div class="grid grid-cols-4 sm:grid-cols-12 gap-6 px-4">
-            <div class="col-span-4 sm:grid-cols-3">
-                <div class="bg-white shadow rounded-lg p-6">
-                    <div class="flex flex-col items-center">
-                        <div class="w-32 h-32 bg-gray-300 rounded-full mb-4 flex items-center justify-center shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 text-gray-600">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                            </svg>
-                        </div>
-                        <h1 class="text-xl font-bold" id="nombreUsuario">[Nombre del Usuario]</h1>
-                        <p class="text-gray-700" id="rolUsuario">Cliente</p>
-                    </div>
+    <!-- Encabezado con el botón "Ver locales" -->
+    <div class="bg-white shadow-md rounded-lg p-4 mb-8 max-w-5xl mx-auto flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-800">Perfil de Cliente</h1>
+        <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" onclick="window.location.href='locales.html'">
+            Ver locales
+        </button>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="container mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Cuadro de perfil -->
+        <div class="bg-white shadow rounded-lg p-6 flex flex-col">
+            <div class="flex flex-col items-center">
+                <div class="w-32 h-32 bg-gray-300 rounded-full mb-4 flex items-center justify-center shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 text-gray-600">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                    </svg>
                 </div>
+                <h1 class="text-xl font-bold" id="nombreUsuario">[Nombre del Usuario]</h1>
+                <p class="text-gray-700" id="rolUsuario">Cliente</p>
             </div>
-            <div class="col-span-4 sm:grid-cols-9">
-                <div class="bg-white shadow rounded-lg p-6">
-                    <h2 class="text-xl font-bold mb-4">Mis reseñas</h2>
-                    <div id="reseñasContainer">
-                        <!-- Las reseñas se cargarán aquí dinámicamente -->
-                    </div>
-                    <div class="text-center mt-4">
-                        <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" onclick="window.location.href='locales.html'">
-                            Realizar una reseña
-                        </button>
-                    </div>
-                </div>
+            <!-- Cuadro gris para descripción futura -->
+            <div class="bg-gray-100 text-gray-700 mt-6 p-4 rounded shadow">
+                <p>Aquí se podrá añadir una descripción del cliente en el futuro.</p>
+            </div>
+        </div>
+
+        <!-- Cuadro "Mis reseñas" -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-xl font-bold mb-4">Mis reseñas</h2>
+            <div id="reseñasContainer">
+                <!-- Las reseñas se cargarán aquí dinámicamente -->
+            </div>
+        </div>
+
+        <!-- Cuadro "Mis reservas" ajustado al tamaño del perfil -->
+        <div class="bg-white shadow rounded-lg p-6 col-span-2">
+            <h2 class="text-xl font-bold mb-4">Mis reservas</h2>
+            <div id="reservasContainer">
+                <!-- Las reservas se cargarán aquí dinámicamente -->
+                <p class="text-gray-700">No tienes reservas disponibles.</p>
             </div>
         </div>
     </div>
@@ -77,6 +91,7 @@
                 document.getElementById('nombreUsuario').textContent = datosUsuario.nombre || 'Usuario';
                 document.getElementById('rolUsuario').textContent = datosUsuario.perfil || 'Cliente';
                 cargarReseñas(datosUsuario.idUsuario);
+                cargarReservas(datosUsuario.idUsuario);
             } else {
                 document.getElementById('reseñasContainer').innerHTML = `<p class="text-red-500">Error: No se pudo cargar el usuario.</p>`;
             }
@@ -119,6 +134,46 @@
             } catch (error) {
                 console.error('Error al cargar reseñas:', error);
                 document.getElementById('reseñasContainer').innerHTML = `<p class="text-red-500">Error al cargar reseñas.</p>`;
+            }
+        }
+
+        // Función para cargar las reservas del usuario
+        async function cargarReservas(idUsuario) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/reservas/user/${idUsuario}`);
+                if (!response.ok) throw new Error('Error al obtener las reservas');
+
+                const reservas = await response.json();
+                const container = document.getElementById('reservasContainer');
+
+                if (reservas.length === 0) {
+                    container.innerHTML = `<p class="text-gray-700">No tienes reservas disponibles.</p>`;
+                } else {
+                    const table = document.createElement('table');
+                    table.className = 'min-w-full bg-white border';
+                    table.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2 border-b">Local</th>
+                                <th class="px-4 py-2 border-b">Fecha</th>
+                                <th class="px-4 py-2 border-b">Hora</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${reservas.map(reserva => `
+                                <tr>
+                                    <td class="px-4 py-2 border-b">${reserva.nombreLocal || 'Local desconocido'}</td>
+                                    <td class="px-4 py-2 border-b">${new Date(reserva.fecha).toLocaleDateString()}</td>
+                                    <td class="px-4 py-2 border-b">${reserva.hora || 'Hora no especificada'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    `;
+                    container.appendChild(table);
+                }
+            } catch (error) {
+                console.error('Error al cargar reservas:', error);
+                document.getElementById('reservasContainer').innerHTML = `<p class="text-red-500">Error al cargar reservas.</p>`;
             }
         }
 

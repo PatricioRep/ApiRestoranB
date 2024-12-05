@@ -4,17 +4,24 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 
-// Importaciones corregidas
 const authRoutes = require('./routes/auth');
 const commentRoutes = require('./routes/comments');
 const userRoutes = require('./routes/user');
 const localRoutes = require('./routes/local');
+const mesasRoutes = require('./routes/mesas');
 
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Configuración de carpeta estática para subir imágenes
+// Servir el directorio de imágenes de forma estática
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
+
 
 // Conectar a la base de datos
 const connectDB = async () => {
@@ -36,8 +43,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/local', localRoutes);
+app.use('/api/mesas', mesasRoutes);
 
-// Servir archivos estáticos
+
+// Servir archivos estáticos del cliente
 const staticPath = path.join(__dirname, '../client/src/pages');
 app.use(express.static(staticPath));
 

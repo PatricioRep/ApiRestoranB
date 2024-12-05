@@ -5,8 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Locales</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .image-container {
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .image-container img {
+            transition: all 0.3s ease;
+        }
+        .image-container:hover img {
+            filter: brightness(0.7);
+        }
+        .image-container .overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.25rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .image-container:hover .overlay {
+            opacity: 1;
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-200 min-h-screen">
     <div class="absolute top-4 right-4">
         <button id="logoutButton" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded">
             Salir de sesión
@@ -20,42 +47,22 @@
                 Volver
             </button>
         </div>
-        <!-- Lista de locales -->
-        <div class="bg-white shadow rounded-lg p-6">
-            <h2 class="text-xl font-bold mb-4">Lista de Locales</h2>
-            <div id="localesContainer">
-                <!-- Los locales se cargarán aquí dinámicamente -->
-            </div>
+        <!-- Título -->
+        <h2 class="text-xl font-bold mb-4 text-center text-gray-800">Lista de Locales</h2>
+        <!-- Contenedor de cartas -->
+        <div id="localesContainer" class="flex flex-wrap justify-center gap-6">
+            <!-- Las cartas se agregarán dinámicamente aquí -->
         </div>
     </div>
 
     <script>
-        // Obtener información del usuario desde el token
-        function obtenerDatosUsuarioDesdeToken() {
-            const token = localStorage.getItem('token');
-            if (!token) return null;
-
-            try {
-                const base64Url = token.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-
-                return JSON.parse(jsonPayload);
-            } catch (error) {
-                console.error('Error al decodificar el token:', error);
-                return null;
-            }
-        }
-
         // Manejar el cierre de sesión
         document.getElementById('logoutButton').addEventListener('click', () => {
             localStorage.removeItem('token');
             window.location.href = 'index.html';
         });
 
-        // Cargar y mostrar la lista de locales desde la base de datos
+        // Cargar y mostrar la lista de locales en cartas
         async function cargarLocales() {
             try {
                 const response = await fetch('http://localhost:5000/api/local/all'); // Ruta para obtener todos los locales
@@ -65,52 +72,73 @@
                 const container = document.getElementById('localesContainer');
 
                 if (locales.length === 0) {
-                    container.innerHTML = `<p class="text-gray-700">No hay locales registrados.</p>`;
+                    container.innerHTML = `<p class="text-gray-700 text-center">No hay locales registrados.</p>`;
                 } else {
-                    const table = document.createElement('table');
-                    table.className = 'min-w-full bg-white border';
-                    table.innerHTML = `
-                        <thead>
-                            <tr>
-                                <th class="px-4 py-2 border-b">Id</th>
-                                <th class="px-4 py-2 border-b">Nombre del Local</th>
-                                <th class="px-4 py-2 border-b">Región</th>
-                                <th class="px-4 py-2 border-b">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${locales.map(local => `
-                                <tr>
-                                    <td class="px-4 py-2 border-b">${local.idLocal}</td>
-                                    <td class="px-4 py-2 border-b">${local.nombreLocal}</td>
-                                    <td class="px-4 py-2 border-b">${local.region}</td>
-                                    <td class="px-4 py-2 border-b text-center">
-                                        <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" onclick="seleccionarLocal('${local.idLocal}')">
-                                            Seleccionar
+                    locales.forEach(local => {
+                        const card = document.createElement('div');
+                        card.className = "bg-white rounded-lg overflow-hidden shadow-lg w-64";
+                        card.innerHTML = `
+                            <div class="image-container" onclick="verLocal('${local.idLocal}')">
+                                <img class="h-48 w-full object-cover" 
+                                     src="${local.imagenLocal ? `/uploads/${local.imagenLocal}` : 'https://via.placeholder.com/300x200'}" 
+                                     alt="${local.nombreLocal}">
+                                <div class="overlay">Ver Local</div>
+                            </div>
+                            <div class="p-6">
+                                <div class="flex items-baseline">
+                                    <span class="inline-block bg-teal-200 text-teal-800 py-1 px-4 text-xs rounded-full uppercase font-semibold tracking-wide">Local</span>
+                                    <div class="ml-2 text-gray-600 text-xs uppercase font-semibold tracking-wide">${local.region}</div>
+                                </div>
+                                <h4 class="mt-2 font-semibold text-lg leading-tight truncate">${local.nombreLocal}</h4>
+                                <div class="mt-4 flex justify-between items-center">
+                                    <!-- Botón Reseñar -->
+                                    <div class="flex flex-col items-center w-1/2">
+                                        <button class="bg-blue-800 hover:bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center" onclick="reseñarLocal('${local.idLocal}')">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+                                            </svg>
                                         </button>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    `;
-                    container.appendChild(table);
+                                        <p class="text-sm text-gray-600 mt-2">Reseñar</p>
+                                    </div>
+                                    <!-- Botón Reservar -->
+                                    <div class="flex flex-col items-center w-1/2">
+                                        <button class="bg-green-700 hover:bg-green-500 text-white rounded-full w-12 h-12 flex items-center justify-center" onclick="reservarLocal('${local.idLocal}')">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                                            </svg>
+                                        </button>
+                                        <p class="text-sm text-gray-600 mt-2">Reservar</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    });
                 }
             } catch (error) {
                 console.error('Error al cargar locales:', error);
                 document.getElementById('localesContainer').innerHTML = `
-                    <p class="text-red-500">Error al cargar los locales. Intenta nuevamente más tarde.</p>
+                    <p class="text-red-500 text-center">Error al cargar los locales. Intenta nuevamente más tarde.</p>
                 `;
             }
         }
 
-        // Función para seleccionar un local y redirigir a la página para realizar una reseña
-        function seleccionarLocal(localId) {
-            // Guardar el ID del local en el almacenamiento local para usarlo en otras páginas
+        function reseñarLocal(localId) {
             localStorage.setItem('selectedLocalId', localId);
-            window.location.href = 'reseña.html'; // Redirigir directamente a la página de realizar reseña
+            window.location.href = 'reseña.html';
         }
 
-        // Cargar los locales al cargar la página
+        function reservarLocal(localId) {
+            localStorage.setItem('reservedLocalId', localId);
+            window.location.href = 'reservar.html';
+        }
+
+        function verLocal(localId) {
+            localStorage.setItem('viewLocalId', localId);
+            window.location.href = 'verlocal.html';
+        }
+
         cargarLocales();
     </script>
 </body>

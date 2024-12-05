@@ -15,6 +15,7 @@ const generarIdLocal = async () => {
 // Agregar un local
 const addLocal = async (req, res) => {
     const { idUsuario, nombreLocal, region } = req.body;
+    const imagenLocal = req.file ? `/uploads/${req.file.filename}` : null; // Obtener la ruta completa de la imagen
 
     try {
         if (!idUsuario || !nombreLocal || !region) {
@@ -27,7 +28,7 @@ const addLocal = async (req, res) => {
         }
 
         const idLocal = await generarIdLocal(); // Generar un idLocal único
-        const newLocal = new Local({ idUsuario, idLocal, nombreLocal, region });
+        const newLocal = new Local({ idUsuario, idLocal, nombreLocal, region, imagenLocal });
         await newLocal.save();
 
         res.status(201).json({ message: 'Local añadido con éxito', local: newLocal });
@@ -42,20 +43,7 @@ const getLocals = async (req, res) => {
     try {
         const locals = await Local.find();
 
-        const enrichedLocals = await Promise.all(
-            locals.map(async (local) => {
-                const user = await User.findOne({ idUsuario: local.idUsuario });
-                return {
-                    idLocal: local.idLocal,
-                    idUsuario: local.idUsuario,
-                    nombreUsuario: user ? user.nombre : 'Usuario desconocido',
-                    nombreLocal: local.nombreLocal,
-                    region: local.region,
-                };
-            })
-        );
-
-        res.json(enrichedLocals);
+        res.status(200).json(locals);
     } catch (error) {
         console.error('Error al obtener locales:', error);
         res.status(500).json({ message: 'Error del servidor', error });
@@ -68,8 +56,7 @@ const getLocalsByUserId = async (req, res) => {
 
     try {
         const locals = await Local.find({ idUsuario: id });
-
-        res.status(200).json(locals); // Devolver los locales encontrados
+        res.status(200).json(locals);
     } catch (error) {
         console.error('Error al obtener locales:', error);
         res.status(500).json({ message: 'Error del servidor', error });
@@ -81,7 +68,7 @@ const getLocalById = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const local = await Local.findOne({ idLocal: id }); // Buscar por idLocal
+        const local = await Local.findOne({ idLocal: id });
         if (!local) {
             return res.status(404).json({ message: 'Local no encontrado' });
         }
@@ -98,7 +85,7 @@ const deleteLocal = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const deletedLocal = await Local.findOneAndDelete({ idLocal: id }); // Eliminar por idLocal
+        const deletedLocal = await Local.findOneAndDelete({ idLocal: id });
         if (!deletedLocal) {
             return res.status(404).json({ message: 'Local no encontrado' });
         }

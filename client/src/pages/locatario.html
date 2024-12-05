@@ -38,12 +38,18 @@
                         <!-- Las reseñas o la opción de "Crear un local" se cargarán aquí dinámicamente -->
                     </div>
                 </div>
+                <!-- Gestión de Mesas -->
+                <div class="bg-white shadow rounded-lg p-6 mt-6">
+                    <h2 class="text-xl font-bold mb-4">Gestión de Mesas</h2>
+                    <div id="gestionMesas">
+                        <!-- Botón dinámico para gestionar mesas -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Decodificar el token JWT para obtener información del usuario
         function obtenerDatosUsuarioDesdeToken() {
             const token = localStorage.getItem('token');
             if (!token) return null;
@@ -62,43 +68,40 @@
             }
         }
 
-        // Función para cargar datos del usuario
         async function cargarDatosUsuario() {
             const datosUsuario = obtenerDatosUsuarioDesdeToken();
             if (datosUsuario) {
                 document.getElementById("nombreUsuario").textContent = datosUsuario.nombre || '[Nombre del Usuario]';
                 document.getElementById("rolUsuario").textContent = datosUsuario.perfil || 'Locatario';
 
-                // Verificar si el usuario tiene un local registrado
                 const local = await verificarLocalUsuario(datosUsuario.idUsuario);
                 if (local) {
                     document.getElementById("nombreLocal").textContent = local.nombreLocal;
-                    document.getElementById("nombreLocal").classList.remove("hidden"); // Mostrar el nombre del local
-                    cargarReseñas(local.idLocal); // Cargar reseñas del local
+                    document.getElementById("nombreLocal").classList.remove("hidden");
+                    cargarReseñas(local.idLocal);
+                    mostrarBotonMesas(local.idLocal); // Mostrar botón de gestión de mesas
                 } else {
-                    mostrarCrearLocal(); // Mostrar opción para crear un local
+                    mostrarCrearLocal();
                 }
             } else {
                 console.error("Error: No se pudo cargar los datos del usuario.");
             }
         }
 
-        // Función para verificar si el usuario tiene un local registrado
         async function verificarLocalUsuario(idUsuario) {
             try {
                 const response = await fetch(`http://localhost:5000/api/local/user/${idUsuario}`);
                 if (response.ok) {
-                    const locales = await response.json(); // Suponiendo que devuelve un array
+                    const locales = await response.json();
                     return locales.length > 0 ? locales[0] : null;
                 }
-                return null; // No hay local registrado
+                return null;
             } catch (error) {
                 console.error('Error al verificar el local del usuario:', error);
                 return null;
             }
         }
 
-        // Mostrar opción para crear un local
         function mostrarCrearLocal() {
             const container = document.getElementById("reseñasContainer");
             container.innerHTML = `
@@ -109,14 +112,11 @@
                     </button>
                 </div>
             `;
-
-            // Redirigir al hacer clic en "Crear un Local"
             document.getElementById("crearLocalButton").addEventListener("click", () => {
                 window.location.href = "crear_local.html";
             });
         }
 
-        // Función para cargar reseñas del local
         async function cargarReseñas(idLocal) {
             try {
                 const response = await fetch(`http://localhost:5000/api/comments/local/${idLocal}`);
@@ -152,6 +152,15 @@
                 console.error('Error al cargar reseñas:', error);
                 document.getElementById("reseñasContainer").innerHTML = `<p class="text-red-500">Error al cargar reseñas.</p>`;
             }
+        }
+
+        function mostrarBotonMesas(idLocal) {
+            const container = document.getElementById("gestionMesas");
+            container.innerHTML = `
+                <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" onclick="window.location.href='mesas.html?idLocal=${idLocal}'">
+                    Gestionar Mesas
+                </button>
+            `;
         }
 
         document.getElementById("logoutButton").addEventListener("click", () => {

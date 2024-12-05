@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Mesas</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .grid-center {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Adaptación flexible de columnas */
+            gap: 16px;
+            justify-content: center; /* Centra las mesas horizontalmente */
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px; /* Espaciado entre botones */
+            margin-bottom: 16px; /* Espaciado inferior */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto py-8">
+        <h2 class="text-xl font-bold mb-4 text-center text-gray-800">Gestión de Mesas</h2>
+
+        <!-- Botones de Volver y Cerrar Sesión -->
+        <div class="button-group">
+            <button id="volverButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                Volver
+            </button>
+            <button id="logoutButton" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+                Cerrar Sesión
+            </button>
+        </div>
+
+        <div class="text-center mb-6">
+            <button id="agregarMesa" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                Agregar una Mesa
+            </button>
+        </div>
+
+        <div id="mesasContainer" class="grid-center">
+            <!-- Mesas cargadas dinámicamente -->
+        </div>
+    </div>
+
+    <script>
+        const idLocal = localStorage.getItem('selectedLocalId');
+
+        async function cargarMesas() {
+            const container = document.getElementById("mesasContainer");
+            try {
+                const response = await fetch(`http://localhost:5000/api/mesas/${idLocal}`);
+                const mesas = await response.json();
+                container.innerHTML = mesas.map(mesa => `
+                    <div class="bg-white shadow rounded-lg p-4 text-center">
+                        <h3 class="text-lg font-bold mb-2">Mesa #${mesa.idMesa}</h3>
+                        <p class="text-sm text-gray-600">Estado: ${mesa.estado}</p>
+                        <p class="text-sm text-gray-600">Capacidad: ${mesa.cantPersonas || 'No definida'}</p>
+                        <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 mt-2 rounded" onclick="eliminarMesa(${mesa.idMesa})">
+                            Eliminar
+                        </button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = '<p class="text-red-500">Error al cargar mesas.</p>';
+            }
+        }
+
+        async function agregarMesa() {
+            try {
+                const response = await fetch(`http://localhost:5000/api/mesas/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idLocal })
+                });
+                if (response.ok) cargarMesas();
+            } catch (error) {
+                console.error('Error al agregar mesa:', error);
+            }
+        }
+
+        async function eliminarMesa(idMesa) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/mesas/${idMesa}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) cargarMesas();
+            } catch (error) {
+                console.error('Error al eliminar mesa:', error);
+            }
+        }
+
+        // Evento para "Volver" al menú del locatario
+        document.getElementById("volverButton").addEventListener("click", () => {
+            window.location.href = "locatario.html";
+        });
+
+        // Evento para "Cerrar Sesión"
+        document.getElementById("logoutButton").addEventListener("click", () => {
+            localStorage.removeItem("token");
+            window.location.href = "index.html";
+        });
+
+        document.getElementById("agregarMesa").addEventListener("click", agregarMesa);
+
+        cargarMesas();
+    </script>
+</body>
+</html>
