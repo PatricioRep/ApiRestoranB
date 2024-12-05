@@ -7,10 +7,12 @@ const path = require('path');
 // Importaciones corregidas
 const authRoutes = require('./routes/auth');
 const commentRoutes = require('./routes/comments');
-const userRoutes = require('./routes/user'); // Agregado
+const userRoutes = require('./routes/user');
+const localRoutes = require('./routes/local');
 
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -32,14 +34,24 @@ connectDB();
 // Rutas de API
 app.use('/api/auth', authRoutes);
 app.use('/api/comments', commentRoutes);
-app.use('/api/users', userRoutes); // Agregado para las rutas de usuarios
+app.use('/api/users', userRoutes);
+app.use('/api/local', localRoutes);
 
-// Servir archivos estáticos desde 'client/src/pages'
-app.use(express.static(path.join(__dirname, '../client/src/pages')));
+// Servir archivos estáticos
+const staticPath = path.join(__dirname, '../client/src/pages');
+app.use(express.static(staticPath));
 
-// Servir 'index.html' en cualquier ruta no definida
+// Manejo de rutas no encontradas
+app.use((req, res, next) => {
+  if (!req.route) {
+    return res.status(404).json({ message: 'Ruta no encontrada' });
+  }
+  next();
+});
+
+// Servir 'index.html' como fallback para SPA
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/src/pages/index.html'));
+  res.sendFile(path.join(staticPath, 'index.html'));
 });
 
 const PORT = process.env.PORT || 5000;
