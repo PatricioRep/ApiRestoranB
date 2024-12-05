@@ -58,11 +58,8 @@ const getCommentsByUserId = async (req, res) => {
     try {
         const comments = await Comment.find({ idUsuario: id });
 
-        if (comments.length === 0) {
-            return res.status(404).json({ message: 'No se encontraron comentarios para este usuario' });
-        }
-
-        res.json(comments);
+        // Devolver un array vacío si no se encuentran comentarios
+        res.status(200).json(comments);
     } catch (error) {
         console.error('Error al obtener comentarios:', error);
         res.status(500).json({ message: 'Error del servidor', error });
