@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Locales</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="absolute top-4 right-4">
+        <button id="logoutButton" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded">
+            Salir de sesión
+        </button>
+    </div>
+
+    <div class="container mx-auto py-8">
+        <!-- Botón de volver -->
+        <div class="text-center mb-6">
+            <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" onclick="window.location.href='cliente.html'">
+                Volver
+            </button>
+        </div>
+        <!-- Lista de locales -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-xl font-bold mb-4">Lista de Locales</h2>
+            <div id="localesContainer">
+                <!-- Los locales se cargarán aquí dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Obtener información del usuario desde el token
+        function obtenerDatosUsuarioDesdeToken() {
+            const token = localStorage.getItem('token');
+            if (!token) return null;
+
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+
+                return JSON.parse(jsonPayload);
+            } catch (error) {
+                console.error('Error al decodificar el token:', error);
+                return null;
+            }
+        }
+
+        // Manejar el cierre de sesión
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = 'index.html';
+        });
+
+        // Cargar y mostrar la lista de locales desde la base de datos
+        async function cargarLocales() {
+            try {
+                const response = await fetch('http://localhost:5000/api/local/all'); // Ruta para obtener todos los locales
+                if (!response.ok) throw new Error('Error al obtener la lista de locales.');
+
+                const locales = await response.json();
+                const container = document.getElementById('localesContainer');
+
+                if (locales.length === 0) {
+                    container.innerHTML = `<p class="text-gray-700">No hay locales registrados.</p>`;
+                } else {
+                    const table = document.createElement('table');
+                    table.className = 'min-w-full bg-white border';
+                    table.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2 border-b">Id</th>
+                                <th class="px-4 py-2 border-b">Nombre del Local</th>
+                                <th class="px-4 py-2 border-b">Región</th>
+                                <th class="px-4 py-2 border-b">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${locales.map(local => `
+                                <tr>
+                                    <td class="px-4 py-2 border-b">${local.idLocal}</td>
+                                    <td class="px-4 py-2 border-b">${local.nombreLocal}</td>
+                                    <td class="px-4 py-2 border-b">${local.region}</td>
+                                    <td class="px-4 py-2 border-b text-center">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" onclick="seleccionarLocal('${local.idLocal}')">
+                                            Seleccionar
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    `;
+                    container.appendChild(table);
+                }
+            } catch (error) {
+                console.error('Error al cargar locales:', error);
+                document.getElementById('localesContainer').innerHTML = `
+                    <p class="text-red-500">Error al cargar los locales. Intenta nuevamente más tarde.</p>
+                `;
+            }
+        }
+
+        // Función para seleccionar un local y redirigir a la página para realizar una reseña
+        function seleccionarLocal(localId) {
+            // Guardar el ID del local en el almacenamiento local para usarlo en otras páginas
+            localStorage.setItem('selectedLocalId', localId);
+            window.location.href = 'reseña.html'; // Redirigir directamente a la página de realizar reseña
+        }
+
+        // Cargar los locales al cargar la página
+        cargarLocales();
+    </script>
+</body>
+</html>

@@ -15,28 +15,29 @@
 
     <div class="container mx-auto py-8">
         <div class="grid grid-cols-4 sm:grid-cols-12 gap-6 px-4">
-            <div class="col-span-4 sm:col-span-3">
+            <div class="col-span-4 sm:grid-cols-3">
                 <div class="bg-white shadow rounded-lg p-6">
                     <div class="flex flex-col items-center">
-                        <!-- Reemplazo de la imagen de perfil con el ícono de usuario -->
                         <div class="w-32 h-32 bg-gray-300 rounded-full mb-4 flex items-center justify-center shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 text-gray-600">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                             </svg>
                         </div>
-                        <h1 class="text-xl font-bold" id="nombreUsuario">Patricio</h1> <!-- Nombre fijo "Patricio" -->
+                        <h1 class="text-xl font-bold" id="nombreUsuario">[Nombre del Usuario]</h1>
                         <p class="text-gray-700" id="rolUsuario">Cliente</p>
-                        <div class="mt-6 flex flex-wrap gap-4 justify-center">
-                            <a href="#" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">Contactar</a>
-                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-span-4 sm:col-span-9">
+            <div class="col-span-4 sm:grid-cols-9">
                 <div class="bg-white shadow rounded-lg p-6">
                     <h2 class="text-xl font-bold mb-4">Mis reseñas</h2>
                     <div id="reseñasContainer">
                         <!-- Las reseñas se cargarán aquí dinámicamente -->
+                    </div>
+                    <div class="text-center mt-4">
+                        <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" onclick="window.location.href='locales.html'">
+                            Realizar una reseña
+                        </button>
                     </div>
                 </div>
             </div>
@@ -44,7 +45,7 @@
     </div>
 
     <script>
-        // Decodificar el token JWT para extraer la información del usuario (si aplica)
+        // Decodificar el token JWT para extraer la información del usuario
         function obtenerDatosUsuarioDesdeToken() {
             const token = localStorage.getItem('token');
             if (!token) return null;
@@ -73,11 +74,10 @@
         function cargarDatosUsuario() {
             const datosUsuario = obtenerDatosUsuarioDesdeToken();
             if (datosUsuario) {
-                document.getElementById('nombreUsuario').textContent = datosUsuario.nombre || 'Patricio';
+                document.getElementById('nombreUsuario').textContent = datosUsuario.nombre || 'Usuario';
                 document.getElementById('rolUsuario').textContent = datosUsuario.perfil || 'Cliente';
-                cargarReseñas(datosUsuario.idUsuario); // Cargar reseñas basadas en idUsuario
+                cargarReseñas(datosUsuario.idUsuario);
             } else {
-                // Si no hay token, muestra un mensaje de error o simula un usuario
                 document.getElementById('reseñasContainer').innerHTML = `<p class="text-red-500">Error: No se pudo cargar el usuario.</p>`;
             }
         }
@@ -86,19 +86,14 @@
         async function cargarReseñas(idUsuario) {
             try {
                 const response = await fetch(`http://localhost:5000/api/comments/user/${idUsuario}`);
-                const reseñas = await response.json();
+                if (!response.ok) throw new Error('Error al obtener las reseñas');
 
+                const reseñas = await response.json();
                 const container = document.getElementById('reseñasContainer');
 
                 if (reseñas.length === 0) {
-                    // Si no hay reseñas, muestra el mensaje clickeable
-                    container.innerHTML = `
-                        <p class="text-blue-600 text-lg font-medium cursor-pointer hover:underline" onclick="window.location.href='reseña.html'">
-                            No has hecho reseñas aún...
-                        </p>
-                    `;
+                    container.innerHTML = `<p class="text-gray-700">No tienes reseñas disponibles.</p>`;
                 } else {
-                    // Si hay reseñas, muestra una tabla
                     const table = document.createElement('table');
                     table.className = 'min-w-full bg-white border';
                     table.innerHTML = `
@@ -112,7 +107,7 @@
                         <tbody>
                             ${reseñas.map(reseña => `
                                 <tr>
-                                    <td class="px-4 py-2 border-b">${reseña.nombreLocal}</td>
+                                    <td class="px-4 py-2 border-b">${reseña.nombreLocal || 'Local desconocido'}</td>
                                     <td class="px-4 py-2 border-b">${reseña.comentario}</td>
                                     <td class="px-4 py-2 border-b">${new Date(reseña.fecha).toLocaleDateString()}</td>
                                 </tr>

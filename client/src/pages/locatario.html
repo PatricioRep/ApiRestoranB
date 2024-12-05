@@ -72,9 +72,9 @@
                 // Verificar si el usuario tiene un local registrado
                 const local = await verificarLocalUsuario(datosUsuario.idUsuario);
                 if (local) {
-                    document.getElementById("nombreLocal").textContent = local.nombre;
+                    document.getElementById("nombreLocal").textContent = local.nombreLocal;
                     document.getElementById("nombreLocal").classList.remove("hidden"); // Mostrar el nombre del local
-                    cargarReseñas(local.nombre); // Cargar reseñas del local
+                    cargarReseñas(local.idLocal); // Cargar reseñas del local
                 } else {
                     mostrarCrearLocal(); // Mostrar opción para crear un local
                 }
@@ -86,10 +86,10 @@
         // Función para verificar si el usuario tiene un local registrado
         async function verificarLocalUsuario(idUsuario) {
             try {
-                const response = await fetch(`http://localhost:5000/api/locals/${idUsuario}`);
+                const response = await fetch(`http://localhost:5000/api/local/user/${idUsuario}`);
                 if (response.ok) {
-                    const local = await response.json();
-                    return local;
+                    const locales = await response.json(); // Suponiendo que devuelve un array
+                    return locales.length > 0 ? locales[0] : null;
                 }
                 return null; // No hay local registrado
             } catch (error) {
@@ -117,34 +117,40 @@
         }
 
         // Función para cargar reseñas del local
-        async function cargarReseñas(local) {
-            const reseñasMock = []; // Simular reseñas vacías
-            const container = document.getElementById("reseñasContainer");
+        async function cargarReseñas(idLocal) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/comments/local/${idLocal}`);
+                const reseñas = await response.json();
+                const container = document.getElementById("reseñasContainer");
 
-            if (reseñasMock.length === 0) {
-                container.innerHTML = `<p class="text-gray-700">No hay reseñas para mostrar.</p>`;
-            } else {
-                const table = document.createElement("table");
-                table.className = "min-w-full bg-white border";
-                table.innerHTML = `
-                    <thead>
-                        <tr>
-                            <th class="px-4 py-2 border-b">Comentario</th>
-                            <th class="px-4 py-2 border-b">Fecha</th>
-                            <th class="px-4 py-2 border-b">Usuario</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${reseñasMock.map(reseña => `
+                if (reseñas.length === 0) {
+                    container.innerHTML = `<p class="text-gray-700">No hay reseñas para mostrar.</p>`;
+                } else {
+                    const table = document.createElement("table");
+                    table.className = "min-w-full bg-white border";
+                    table.innerHTML = `
+                        <thead>
                             <tr>
-                                <td class="px-4 py-2 border-b">${reseña.comentario}</td>
-                                <td class="px-4 py-2 border-b">${new Date(reseña.fecha).toLocaleDateString()}</td>
-                                <td class="px-4 py-2 border-b">${reseña.usuario}</td>
+                                <th class="px-4 py-2 border-b">Comentario</th>
+                                <th class="px-4 py-2 border-b">Fecha</th>
+                                <th class="px-4 py-2 border-b">Usuario</th>
                             </tr>
-                        `).join("")}
-                    </tbody>
-                `;
-                container.appendChild(table);
+                        </thead>
+                        <tbody>
+                            ${reseñas.map(reseña => `
+                                <tr>
+                                    <td class="px-4 py-2 border-b">${reseña.comentario}</td>
+                                    <td class="px-4 py-2 border-b">${new Date(reseña.fecha).toLocaleDateString()}</td>
+                                    <td class="px-4 py-2 border-b">${reseña.usuario}</td>
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    `;
+                    container.appendChild(table);
+                }
+            } catch (error) {
+                console.error('Error al cargar reseñas:', error);
+                document.getElementById("reseñasContainer").innerHTML = `<p class="text-red-500">Error al cargar reseñas.</p>`;
             }
         }
 

@@ -3,137 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elegir Local para Reseña</title>
+    <title>Reseña</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <style>
-        .card {
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: transform 0.2s;
-            background-color: #fff;
-        }
-        .card:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        .circle-button {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-right: 16px;
-            transition: transform 0.2s;
-        }
-        .circle-button:hover {
-            transform: scale(1.1);
-        }
-        .review-container {
-            margin-top: 20px;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-        }
-        .submit-button, .back-button {
-            margin-top: 10px;
-            background-color: #4299e1;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .submit-button:hover, .back-button:hover {
-            background-color: #3182ce;
-        }
-        .alert {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            background-color: #38a169;
-            color: white;
-            border-radius: 5px;
-            display: none;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .alert svg {
-            width: 20px;
-            height: 20px;
-        }
-        .selected-icon {
-            margin-bottom: 10px;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@material-tailwind/react@2.1.1/umd/index.min.js"></script>
 </head>
 <body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
     <!-- Botón para regresar -->
-    <button class="back-button" onclick="volver()">Volver</button>
-
-    <!-- Contenedor de cartas de locales -->
-    <div id="localCardsContainer" class="mt-4 w-4/5 space-y-4">
-        <div class="card">
-            <button class="circle-button bg-blue-500 hover:bg-blue-600 text-white" onclick="selectLocal('Zangucheria Esteban')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 12l7-7 7 7M5 12v7m0 0h14m-14 0h14m-14-7v7m14-7v7m-14 0h14m-14-7v7" />
-                </svg>
-            </button>
-            <span class="text-lg font-medium">Zangucheria Esteban</span>
-        </div>
-
-        <div class="card">
-            <button class="circle-button bg-green-500 hover:bg-green-600 text-white" onclick="selectLocal('Tia Rosita')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 4.5V7a2 2 0 01-2 2h-5a2 2 0 01-2-2V4.5a2 2 0 011.414-1.914M8.5 10h7" />
-                </svg>
-            </button>
-            <span class="text-lg font-medium">Tia Rosita</span>
-        </div>
-
-        <div class="card">
-            <button class="circle-button bg-red-500 hover:bg-red-600 text-white" onclick="selectLocal('La Milanesa')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3L4.5 12h9L9.75 3zm0 0v18m0-18h9l-5.25 9h-9m14.25 9h-5.25m0 0L9.75 3" />
-                </svg>
-            </button>
-            <span class="text-lg font-medium">La Milanesa</span>
-        </div>
-    </div>
+    <button class="back-button bg-blue-500 text-white px-4 py-2 rounded mb-6" onclick="volver()">Volver</button>
 
     <!-- Contenedor para reseña -->
-    <div id="reviewContainer" class="review-container">
-        <div id="selectedIconContainer" class="selected-icon"></div>
-        <textarea id="comentarioInput" placeholder="Rellena tu reseña!!" class="border rounded w-80 p-2 mb-4"></textarea>
-        <button class="submit-button" onclick="submitReview()">Subir reseña</button>
+    <div id="reviewContainer" class="review-container mt-6 flex flex-col items-center">
+        <h2 id="localName" class="text-lg font-medium mb-4">Local: [Cargando...]</h2>
+        <div id="ratingContainer" class="mb-4">
+            <label class="block text-gray-700 font-bold mb-2">Califica el Local:</label>
+            <div id="starRating"></div>
+        </div>
+        <textarea id="comentarioInput" placeholder="Escribe tu reseña aquí..." class="border rounded w-80 p-2 mb-4"></textarea>
+        <button class="submit-button bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" onclick="submitReview()">Enviar Reseña</button>
     </div>
 
     <!-- Popup de confirmación -->
-    <div id="successAlert" class="alert flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <div id="successAlert" class="alert fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded hidden flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
         </svg>
-        <span>Reseña subida exitosamente</span>
+        <span>¡Reseña enviada exitosamente!</span>
+    </div>
+
+    <!-- Popup de error -->
+    <div id="errorAlert" class="alert fixed bottom-4 left-4 bg-red-500 text-white px-4 py-2 rounded hidden flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        <span id="errorMessage">Ocurrió un error.</span>
     </div>
 
     <script>
         let localSeleccionado = '';
+        let estrellasSeleccionadas = 0;
+        let nombreLocal = '';
 
-        function selectLocal(nombreLocal) {
-            localSeleccionado = nombreLocal;
-            document.getElementById('localCardsContainer').style.display = 'none';
-            document.getElementById('reviewContainer').style.display = 'flex';
+        // Cargar el nombre del local seleccionado usando idLocal
+        async function cargarLocalSeleccionado() {
+            localSeleccionado = localStorage.getItem('selectedLocalId');
+            if (!localSeleccionado) {
+                mostrarError("No se seleccionó ningún local.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/local/${localSeleccionado}`);
+                if (!response.ok) throw new Error('Error al obtener el local.');
+
+                const local = await response.json();
+
+                nombreLocal = local.nombreLocal; // Guardar el nombre del local
+                document.getElementById('localName').textContent = `Local: ${nombreLocal}`;
+            } catch (error) {
+                mostrarError("Error al cargar el local seleccionado: " + error.message);
+            }
+        }
+
+        // Configurar estrellas de calificación
+        function inicializarEstrellas() {
+            const starContainer = document.getElementById("starRating");
+            const ratingDiv = document.createElement("div");
+            ratingDiv.className = "flex space-x-2";
+            starContainer.appendChild(ratingDiv);
+
+            for (let i = 1; i <= 5; i++) {
+                const star = document.createElement("button");
+                star.className = "text-yellow-400 text-2xl focus:outline-none";
+                star.innerHTML = "★";
+                star.dataset.value = i;
+                star.addEventListener("click", () => {
+                    estrellasSeleccionadas = i;
+                    actualizarEstrellas(i);
+                });
+                ratingDiv.appendChild(star);
+            }
+        }
+
+        function actualizarEstrellas(valor) {
+            const stars = document.querySelectorAll("#starRating button");
+            stars.forEach((star, index) => {
+                star.style.color = index < valor ? "#ffc107" : "#e4e5e9";
+            });
         }
 
         function volver() {
@@ -150,7 +105,7 @@
                 const jsonPayload = JSON.parse(atob(base64));
                 return jsonPayload.idUsuario; // Extraer idUsuario
             } catch (error) {
-                console.error('Error al decodificar el token:', error);
+                mostrarError("Error al decodificar el token.");
                 return null;
             }
         }
@@ -159,8 +114,8 @@
             const comentario = document.getElementById('comentarioInput').value;
             const idUsuario = obtenerIdUsuarioDesdeToken();
 
-            if (!comentario || !localSeleccionado || !idUsuario) {
-                alert('Por favor completa todos los campos.');
+            if (!comentario || !localSeleccionado || estrellasSeleccionadas === 0 || !idUsuario) {
+                mostrarError("Por favor, completa todos los campos y selecciona una calificación.");
                 return;
             }
 
@@ -172,30 +127,46 @@
                     },
                     body: JSON.stringify({
                         idUsuario,
+                        idLocal: localSeleccionado, // Asociar el comentario al idLocal
                         comentario,
-                        nombreLocal: localSeleccionado,
+                        nombreLocal,
+                        estrellas: estrellasSeleccionadas,
                     }),
                 });
 
-                const result = await response.json();
                 if (response.ok) {
                     mostrarAlerta();
                 } else {
-                    console.error('Error al enviar reseña:', result);
+                    const result = await response.json();
+                    mostrarError("Error al enviar reseña: " + result.message);
                 }
             } catch (error) {
-                console.error('Error en la solicitud:', error);
+                mostrarError("Error en la solicitud: " + error.message);
             }
         }
 
         function mostrarAlerta() {
             const alert = document.getElementById('successAlert');
-            alert.style.display = 'flex';
+            alert.classList.remove('hidden');
             setTimeout(() => {
-                alert.style.display = 'none';
-                volver();
+                alert.classList.add('hidden');
             }, 3000);
         }
+
+        function mostrarError(mensaje) {
+            const errorAlert = document.getElementById('errorAlert');
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = mensaje;
+            errorAlert.classList.remove('hidden');
+            setTimeout(() => {
+                errorAlert.classList.add('hidden');
+            }, 5000);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            cargarLocalSeleccionado();
+            inicializarEstrellas();
+        });
     </script>
 </body>
 </html>
