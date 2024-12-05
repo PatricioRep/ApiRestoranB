@@ -4,6 +4,7 @@ const {
     addComment,
     getComments,
     getCommentsByUserId,
+    getCommentsByLocal, // Nueva función para comentarios por idLocal
     deleteComment,
 } = require('../controllers/commentController');
 
@@ -20,6 +21,22 @@ router.post('/add', async (req, res, next) => {
 router.get('/all', async (req, res, next) => {
     try {
         await getComments(req, res);
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Ruta para obtener comentarios por idLocal
+router.get('/local/:idLocal', async (req, res, next) => {
+    try {
+        const { idLocal } = req.params;
+
+        // Validar si el idLocal es válido
+        if (!idLocal) {
+            return res.status(400).json({ message: 'El ID del local es obligatorio' });
+        }
+
+        await getCommentsByLocal(req, res);
     } catch (error) {
         next(error);
     }

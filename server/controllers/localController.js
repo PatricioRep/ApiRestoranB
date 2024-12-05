@@ -1,6 +1,17 @@
 const Local = require('../models/Local');
 const User = require('../models/User');
 
+// Generar un idLocal único
+const generarIdLocal = async () => {
+    let idLocal;
+    let existe;
+    do {
+        idLocal = Math.floor(Math.random() * 1000) + 1; // Generar un número aleatorio entre 1 y 1000
+        existe = await Local.findOne({ idLocal }); // Verificar si ya existe en la base de datos
+    } while (existe);
+    return idLocal;
+};
+
 // Agregar un local
 const addLocal = async (req, res) => {
     const { idUsuario, nombreLocal, region } = req.body;
@@ -15,7 +26,8 @@ const addLocal = async (req, res) => {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
-        const newLocal = new Local({ idUsuario, nombreLocal, region });
+        const idLocal = await generarIdLocal(); // Generar un idLocal único
+        const newLocal = new Local({ idUsuario, idLocal, nombreLocal, region });
         await newLocal.save();
 
         res.status(201).json({ message: 'Local añadido con éxito', local: newLocal });
@@ -34,7 +46,7 @@ const getLocals = async (req, res) => {
             locals.map(async (local) => {
                 const user = await User.findOne({ idUsuario: local.idUsuario });
                 return {
-                    idLocal: local._id,
+                    idLocal: local.idLocal,
                     idUsuario: local.idUsuario,
                     nombreUsuario: user ? user.nombre : 'Usuario desconocido',
                     nombreLocal: local.nombreLocal,
@@ -57,21 +69,36 @@ const getLocalsByUserId = async (req, res) => {
     try {
         const locals = await Local.find({ idUsuario: id });
 
-        // Devolver un array vacío si no se encuentran locales
-        res.status(200).json(locals);
+        res.status(200).json(locals); // Devolver los locales encontrados
     } catch (error) {
         console.error('Error al obtener locales:', error);
         res.status(500).json({ message: 'Error del servidor', error });
     }
 };
 
-// Eliminar un local por ID
+// Obtener un local por su idLocal
+const getLocalById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const local = await Local.findOne({ idLocal: id }); // Buscar por idLocal
+        if (!local) {
+            return res.status(404).json({ message: 'Local no encontrado' });
+        }
+
+        res.status(200).json(local);
+    } catch (error) {
+        console.error('Error al obtener el local:', error);
+        res.status(500).json({ message: 'Error del servidor', error });
+    }
+};
+
+// Eliminar un local por idLocal
 const deleteLocal = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const deletedLocal = await Local.findByIdAndDelete(id);
-
+        const deletedLocal = await Local.findOneAndDelete({ idLocal: id }); // Eliminar por idLocal
         if (!deletedLocal) {
             return res.status(404).json({ message: 'Local no encontrado' });
         }
@@ -83,4 +110,4 @@ const deleteLocal = async (req, res) => {
     }
 };
 
-module.exports = { addLocal, getLocals, getLocalsByUserId, deleteLocal };
+module.exports = { addLocal, getLocals, getLocalsByUserId, deleteLocal, getLocalById };

@@ -5,6 +5,7 @@ const {
     getLocals,
     getLocalsByUserId,
     deleteLocal,
+    getLocalById, // Se agrega el controlador para obtener un local por su ID
 } = require('../controllers/localController');
 
 // Ruta para agregar un local
@@ -41,12 +42,28 @@ router.get('/user/:id', async (req, res, next) => {
     }
 });
 
-// Ruta para eliminar un local por su ID
+// Ruta para obtener un local específico por su idLocal
+router.get('/:id', async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        // Validar si el idLocal es válido
+        if (!id) {
+            return res.status(400).json({ message: 'El ID del local es obligatorio' });
+        }
+
+        await getLocalById(req, res);
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Ruta para eliminar un local por su idLocal
 router.delete('/:id', async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        // Validar si el ID del local es válido
+        // Validar si el idLocal es válido
         if (!id) {
             return res.status(400).json({ message: 'El ID del local es obligatorio' });
         }

@@ -3,19 +3,27 @@ const User = require('../models/User');
 
 // Agregar un comentario
 const addComment = async (req, res) => {
-    const { idUsuario, comentario, nombreLocal } = req.body;
+    const { idUsuario, idLocal, comentario, nombreLocal, estrellas } = req.body;
 
     try {
-        if (!idUsuario || !comentario || !nombreLocal) {
+        // Validar que todos los campos sean proporcionados
+        if (!idUsuario || !idLocal || !comentario || !nombreLocal || !estrellas) {
             return res.status(400).json({ message: 'Todos los campos son obligatorios' });
         }
 
+        // Validar que la calificación de estrellas esté entre 1 y 5
+        if (estrellas < 1 || estrellas > 5) {
+            return res.status(400).json({ message: 'La calificación debe estar entre 1 y 5 estrellas' });
+        }
+
+        // Validar que el usuario exista en la base de datos
         const user = await User.findOne({ idUsuario });
         if (!user) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
-        const newComment = new Comment({ idUsuario, comentario, nombreLocal });
+        // Crear y guardar el nuevo comentario
+        const newComment = new Comment({ idUsuario, idLocal, comentario, nombreLocal, estrellas });
         await newComment.save();
 
         res.status(201).json({ message: 'Comentario añadido con éxito', comentario: newComment });
@@ -36,9 +44,11 @@ const getComments = async (req, res) => {
                 return {
                     idComentario: comment._id,
                     idUsuario: comment.idUsuario,
+                    idLocal: comment.idLocal, // Incluir idLocal
                     nombreUsuario: user ? user.nombre : 'Usuario desconocido',
                     comentario: comment.comentario,
                     nombreLocal: comment.nombreLocal,
+                    estrellas: comment.estrellas, // Incluir calificación de estrellas
                     fecha: comment.fecha,
                 };
             })
@@ -58,7 +68,36 @@ const getCommentsByUserId = async (req, res) => {
     try {
         const comments = await Comment.find({ idUsuario: id });
 
-        // Devolver un array vacío si no se encuentran comentarios
+        const enrichedComments = await Promise.all(
+            comments.map(async (comment) => {
+                const user = await User.findOne({ idUsuario: comment.idUsuario });
+                return {
+                    idComentario: comment._id,
+                    idUsuario: comment.idUsuario,
+                    idLocal: comment.idLocal, // Incluir idLocal
+                    nombreUsuario: user ? user.nombre : 'Usuario desconocido',
+                    comentario: comment.comentario,
+                    nombreLocal: comment.nombreLocal,
+                    estrellas: comment.estrellas, // Incluir calificación de estrellas
+                    fecha: comment.fecha,
+                };
+            })
+        );
+
+        res.status(200).json(enrichedComments);
+    } catch (error) {
+        console.error('Error al obtener comentarios:', error);
+        res.status(500).json({ message: 'Error del servidor', error });
+    }
+};
+
+// Obtener comentarios por idLocal
+const getCommentsByLocal = async (req, res) => {
+    const { idLocal } = req.params;
+
+    try {
+        const comments = await Comment.find({ idLocal });
+
         res.status(200).json(comments);
     } catch (error) {
         console.error('Error al obtener comentarios:', error);
@@ -84,4 +123,4 @@ const deleteComment = async (req, res) => {
     }
 };
 
-module.exports = { addComment, getComments, getCommentsByUserId, deleteComment };
+module.exports = { addComment, getComments, getCommentsByUserId, getCommentsByLocal, deleteComment };
