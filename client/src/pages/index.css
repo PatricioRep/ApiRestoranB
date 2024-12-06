@@ -1,0 +1,39 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+header {
+  background-color: #f4f4f4;
+  padding: 10px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+}
+
+#loginButton {
+  margin-top: 10px;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+main {
+  padding: 20px;
+}
+
+#opiniones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.opinion-card {
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 5px;
+}

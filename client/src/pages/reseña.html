@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reseña</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@material-tailwind/react@2.1.1/umd/index.min.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
+    <!-- Botón para regresar -->
+    <button class="back-button bg-blue-500 text-white px-4 py-2 rounded mb-6" onclick="volver()">Volver</button>
+
+    <!-- Contenedor para reseña -->
+    <div id="reviewContainer" class="review-container mt-6 flex flex-col items-center">
+        <h2 id="localName" class="text-lg font-medium mb-4">Local: [Cargando...]</h2>
+        <div id="ratingContainer" class="mb-4">
+            <label class="block text-gray-700 font-bold mb-2">Califica el Local:</label>
+            <div id="starRating"></div>
+        </div>
+        <textarea id="comentarioInput" placeholder="Escribe tu reseña aquí..." class="border rounded w-80 p-2 mb-4"></textarea>
+        <button class="submit-button bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" onclick="submitReview()">Enviar Reseña</button>
+    </div>
+
+    <!-- Popup de confirmación -->
+    <div id="successAlert" class="alert fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded hidden flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+        <span>¡Reseña enviada exitosamente!</span>
+    </div>
+
+    <!-- Popup de error -->
+    <div id="errorAlert" class="alert fixed bottom-4 left-4 bg-red-500 text-white px-4 py-2 rounded hidden flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        <span id="errorMessage">Ocurrió un error.</span>
+    </div>
+
+    <script>
+        let localSeleccionado = '';
+        let estrellasSeleccionadas = 0;
+        let nombreLocal = '';
+
+        // Cargar el nombre del local seleccionado usando idLocal
+        async function cargarLocalSeleccionado() {
+            localSeleccionado = localStorage.getItem('selectedLocalId');
+            if (!localSeleccionado) {
+                mostrarError("No se seleccionó ningún local.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/local/${localSeleccionado}`);
+                if (!response.ok) throw new Error('Error al obtener el local.');
+
+                const local = await response.json();
+
+                nombreLocal = local.nombreLocal; // Guardar el nombre del local
+                document.getElementById('localName').textContent = `Local: ${nombreLocal}`;
+            } catch (error) {
+                mostrarError("Error al cargar el local seleccionado: " + error.message);
+            }
+        }
+
+        // Configurar estrellas de calificación
+        function inicializarEstrellas() {
+            const starContainer = document.getElementById("starRating");
+            const ratingDiv = document.createElement("div");
+            ratingDiv.className = "flex space-x-2";
+            starContainer.appendChild(ratingDiv);
+
+            for (let i = 1; i <= 5; i++) {
+                const star = document.createElement("button");
+                star.className = "text-yellow-400 text-2xl focus:outline-none";
+                star.innerHTML = "★";
+                star.dataset.value = i;
+                star.addEventListener("click", () => {
+                    estrellasSeleccionadas = i;
+                    actualizarEstrellas(i);
+                });
+                ratingDiv.appendChild(star);
+            }
+        }
+
+        function actualizarEstrellas(valor) {
+            const stars = document.querySelectorAll("#starRating button");
+            stars.forEach((star, index) => {
+                star.style.color = index < valor ? "#ffc107" : "#e4e5e9";
+            });
+        }
+
+        function volver() {
+            window.location.href = 'cliente.html';
+        }
+
+        function obtenerIdUsuarioDesdeToken() {
+            const token = localStorage.getItem('token');
+            if (!token) return null;
+
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = JSON.parse(atob(base64));
+                return jsonPayload.idUsuario; // Extraer idUsuario
+            } catch (error) {
+                mostrarError("Error al decodificar el token.");
+                return null;
+            }
+        }
+
+        async function submitReview() {
+            const comentario = document.getElementById('comentarioInput').value;
+            const idUsuario = obtenerIdUsuarioDesdeToken();
+
+            if (!comentario || !localSeleccionado || estrellasSeleccionadas === 0 || !idUsuario) {
+                mostrarError("Por favor, completa todos los campos y selecciona una calificación.");
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5000/api/comments/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        idUsuario,
+                        idLocal: localSeleccionado, // Asociar el comentario al idLocal
+                        comentario,
+                        nombreLocal,
+                        estrellas: estrellasSeleccionadas,
+                    }),
+                });
+
+                if (response.ok) {
+                    mostrarAlerta();
+                } else {
+                    const result = await response.json();
+                    mostrarError("Error al enviar reseña: " + result.message);
+                }
+            } catch (error) {
+                mostrarError("Error en la solicitud: " + error.message);
+            }
+        }
+
+        function mostrarAlerta() {
+            const alert = document.getElementById('successAlert');
+            alert.classList.remove('hidden');
+            setTimeout(() => {
+                alert.classList.add('hidden');
+            }, 3000);
+        }
+
+        function mostrarError(mensaje) {
+            const errorAlert = document.getElementById('errorAlert');
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = mensaje;
+            errorAlert.classList.remove('hidden');
+            setTimeout(() => {
+                errorAlert.classList.add('hidden');
+            }, 5000);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            cargarLocalSeleccionado();
+            inicializarEstrellas();
+        });
+    </script>
+</body>
+</html>

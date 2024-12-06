@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Opiniones de Restaurantes</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"> <!-- Tailwind CSS -->
+  <!-- Incluye tu archivo de estilos adicionales si es necesario -->
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-start">
+  <header class="w-full bg-blue-600 text-white p-4 text-center">
+    <h1 class="text-3xl font-bold">InfoRes Prototipo</h1>
+    <button id="loginButton" class="mt-4 bg-white text-blue-600 px-4 py-2 rounded hover:bg-blue-100">
+      Iniciar Sesión
+    </button>
+  </header>
+  <main class="w-full max-w-3xl p-4 mt-4">
+    <section id="opiniones" class="space-y-4">
+      <!-- Las opiniones se cargarán aquí dinámicamente -->
+    </section>
+  </main>
+  <script>
+    // Botón de "Iniciar Sesión"
+    document.getElementById('loginButton').addEventListener('click', () => {
+      window.location.href = 'login.html'; // Redirige a la página de login
+    });
+
+    // Función para obtener todas las reseñas desde el backend
+    async function obtenerReseñas() {
+      try {
+        const response = await fetch('http://localhost:5000/api/comments/all');
+        if (!response.ok) {
+          throw new Error('Error al obtener las reseñas');
+        }
+        const reseñas = await response.json();
+        renderComentarios(reseñas);
+      } catch (error) {
+        console.error('Error:', error);
+        const opinionesContainer = document.getElementById('opiniones');
+        opinionesContainer.innerHTML = `<p class="text-red-500">Error al cargar las reseñas. Por favor, inténtalo más tarde.</p>`;
+      }
+    }
+
+    // Renderizar reseñas obtenidas en la página
+    function renderComentarios(comentarios) {
+      const opinionesContainer = document.getElementById('opiniones');
+      opinionesContainer.innerHTML = ''; // Limpiar cualquier contenido previo
+
+      if (comentarios.length === 0) {
+        opinionesContainer.innerHTML = '<p class="text-gray-600">No hay reseñas disponibles en este momento.</p>';
+        return;
+      }
+
+      comentarios.forEach(comentario => {
+        const comentarioCard = document.createElement('div');
+        comentarioCard.className = 'p-4 bg-white rounded shadow-md';
+        comentarioCard.innerHTML = `
+          <p class="font-semibold text-blue-600">Local: ${comentario.nombreLocal}</p>
+          <p>${comentario.comentario}</p>
+          <p class="text-sm text-gray-500"><strong>Por:</strong> ${comentario.nombreUsuario || 'Usuario desconocido'}</p>
+          <p class="text-xs text-gray-400"><strong>Fecha:</strong> ${new Date(comentario.fecha).toLocaleDateString()}</p>
+        `;
+        opinionesContainer.appendChild(comentarioCard);
+      });
+    }
+
+    // Llamar a la función para obtener y renderizar las reseñas al cargar la página
+    obtenerReseñas();
+  </script>
+</body>
+</html>

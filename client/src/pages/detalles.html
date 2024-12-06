@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.css" rel="stylesheet" />
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.js"></script>
+    <script src="mapkick.js"></script>
+    <script>
+      mapboxgl.accessToken = "YOUR-TOKEN"
+    </script>
+    <style>
+        .image-container {
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .image-container img {
+            transition: all 0.3s ease;
+        }
+        .image-container:hover img {
+            filter: brightness(0.7);
+        }
+        .image-container .overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.25rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .image-container:hover .overlay {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-200 min-h-screen">
+    <div class="absolute top-4 right-4">
+        <button id="logoutButton" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded">
+            Salir de sesión
+        </button>
+    </div>
+
+    <div class="container mx-auto py-8">
+        <!-- Botón de volver -->
+        <div class="text-center mb-6">
+            <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" onclick="window.location.href='locales.html'">
+                Volver
+            </button>
+        </div>
+    <div>
+       <p>
+        
+       </p> 
+    <dib/>
+</body>
+</html>

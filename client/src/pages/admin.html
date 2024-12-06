@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página de Administrador</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+            z-index: 50;
+        }
+        .alert {
+            background-color: #38a169;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .alert svg {
+            width: 24px;
+            height: 24px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="overlay" class="overlay">
+        <div class="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>La reseña se ha eliminado exitosamente.</span>
+        </div>
+    </div>
+
+    <div class="absolute top-4 right-4">
+        <button id="logoutButton" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded">
+            Salir de sesión
+        </button>
+    </div>
+
+    <div class="container mx-auto py-8">
+        <div class="grid grid-cols-4 sm:grid-cols-12 gap-6 px-4">
+            <!-- Zona de perfil del administrador -->
+            <div class="col-span-4 sm:col-span-3">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <div class="flex flex-col items-center">
+                        <div class="w-32 h-32 bg-gray-300 rounded-full mb-4 flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 text-gray-600">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                            </svg>
+                        </div>
+                        <h1 class="text-xl font-bold" id="nombreUsuario">Admin</h1>
+                        <p class="text-gray-700" id="rolUsuario">Administrador</p>
+                        <div class="mt-6 flex flex-wrap gap-4 justify-center">
+                            <a href="#" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">Panel de Control</a>
+                            <a href="usuarios.html" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">Gestionar Usuarios</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Zona de reseñas -->
+            <div class="col-span-4 sm:col-span-9">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h2 class="text-xl font-bold mb-4">Panel de Reseñas de Usuarios</h2>
+                    <div id="reseñasContainer">
+                        <!-- Las reseñas se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function cargarReseñas() {
+            const container = document.getElementById('reseñasContainer');
+            container.innerHTML = ''; // Limpiar contenido previo
+
+            try {
+                const response = await fetch('http://localhost:5000/api/comments/all');
+                if (!response.ok) {
+                    throw new Error(`Error al obtener las reseñas: ${response.statusText}`);
+                }
+
+                const reseñas = await response.json();
+
+                if (reseñas.length === 0) {
+                    container.innerHTML = `<p class="text-gray-700">No hay reseñas para mostrar.</p>`;
+                } else {
+                    const table = document.createElement('table');
+                    table.className = 'min-w-full bg-white border';
+                    table.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2 border-b">Nombre del Local</th>
+                                <th class="px-4 py-2 border-b">Comentario</th>
+                                <th class="px-4 py-2 border-b">Fecha</th>
+                                <th class="px-4 py-2 border-b">Usuario</th>
+                                <th class="px-4 py-2 border-b">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${reseñas.map((reseña) => `
+                                <tr>
+                                    <td class="px-4 py-2 border-b">${reseña.nombreLocal || 'Sin nombre'}</td>
+                                    <td class="px-4 py-2 border-b">${reseña.comentario}</td>
+                                    <td class="px-4 py-2 border-b">${new Date(reseña.fecha).toLocaleDateString()}</td>
+                                    <td class="px-4 py-2 border-b">${reseña.idUsuario || 'Desconocido'}</td>
+                                    <td class="px-4 py-2 border-b flex gap-2">
+                                        <button class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600" onclick="eliminarReseña('${reseña.idComentario || reseña._id}')">
+                                            Eliminar
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    `;
+                    container.appendChild(table);
+                }
+            } catch (error) {
+                console.error('Error al cargar reseñas:', error);
+                container.innerHTML = `<p class="text-red-500">Error al cargar las reseñas.</p>`;
+            }
+        }
+
+        async function eliminarReseña(id) {
+            if (!id) {
+                console.error('ID del comentario no definido');
+                alert('No se pudo eliminar el comentario. ID no encontrado.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/comments/${id}`, {
+                    method: 'DELETE',
+                });
+
+                if (!response.ok) {
+                    const result = await response.json();
+                    throw new Error(result.message || 'Error desconocido al eliminar el comentario.');
+                }
+
+                mostrarAlerta();
+                cargarReseñas();
+            } catch (error) {
+                console.error('Error al eliminar la reseña:', error);
+                alert('Error al eliminar la reseña.');
+            }
+        }
+
+        function mostrarAlerta() {
+            const overlay = document.getElementById('overlay');
+            overlay.style.display = 'flex'; // Mostrar alerta
+            setTimeout(() => {
+                overlay.style.display = 'none'; // Ocultar alerta después de 3 segundos
+            }, 3000);
+        }
+
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = 'index.html';
+        });
+
+        cargarReseñas();
+    </script>
+</body>
+</html>

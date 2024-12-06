@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página de Locatario</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="absolute top-4 right-4">
+        <button id="logoutButton" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded">
+            Salir de sesión
+        </button>
+    </div>
+
+    <div class="container mx-auto py-8">
+        <div class="grid grid-cols-4 sm:grid-cols-12 gap-6 px-4">
+            <!-- Perfil del Locatario -->
+            <div class="col-span-4 sm:col-span-3">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <div class="flex flex-col items-center">
+                        <div class="w-32 h-32 bg-gray-300 rounded-full mb-4 flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 text-gray-600">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                            </svg>
+                        </div>
+                        <h1 class="text-xl font-bold" id="nombreUsuario">[Nombre del Usuario]</h1>
+                        <p id="nombreLocal" class="text-gray-700 hidden">[Nombre del Local]</p> <!-- Oculto inicialmente -->
+                        <p class="text-gray-700" id="rolUsuario">Locatario</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Reseñas del Local -->
+            <div class="col-span-4 sm:col-span-9">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h2 class="text-xl font-bold mb-4">Reseñas de Mi Local</h2>
+                    <div id="reseñasContainer">
+                        <!-- Las reseñas o la opción de "Crear un local" se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+                <!-- Gestión de Mesas -->
+                <div class="bg-white shadow rounded-lg p-6 mt-6">
+                    <h2 class="text-xl font-bold mb-4">Gestión de Mesas</h2>
+                    <div id="gestionMesas">
+                        <!-- Botón dinámico para gestionar mesas -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function obtenerDatosUsuarioDesdeToken() {
+            const token = localStorage.getItem('token');
+            if (!token) return null;
+
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+
+                return JSON.parse(jsonPayload);
+            } catch (error) {
+                console.error('Error al decodificar el token:', error);
+                return null;
+            }
+        }
+
+        async function cargarDatosUsuario() {
+            const datosUsuario = obtenerDatosUsuarioDesdeToken();
+            if (datosUsuario) {
+                document.getElementById("nombreUsuario").textContent = datosUsuario.nombre || '[Nombre del Usuario]';
+                document.getElementById("rolUsuario").textContent = datosUsuario.perfil || 'Locatario';
+
+                const local = await verificarLocalUsuario(datosUsuario.idUsuario);
+                if (local) {
+                    document.getElementById("nombreLocal").textContent = local.nombreLocal;
+                    document.getElementById("nombreLocal").classList.remove("hidden");
+                    cargarReseñas(local.idLocal);
+                    mostrarBotonMesas(local.idLocal); // Mostrar botón de gestión de mesas
+                } else {
+                    mostrarCrearLocal();
+                }
+            } else {
+                console.error("Error: No se pudo cargar los datos del usuario.");
+            }
+        }
+
+        async function verificarLocalUsuario(idUsuario) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/local/user/${idUsuario}`);
+                if (response.ok) {
+                    const locales = await response.json();
+                    return locales.length > 0 ? locales[0] : null;
+                }
+                return null;
+            } catch (error) {
+                console.error('Error al verificar el local del usuario:', error);
+                return null;
+            }
+        }
+
+        function mostrarCrearLocal() {
+            const container = document.getElementById("reseñasContainer");
+            container.innerHTML = `
+                <div class="text-center">
+                    <p class="text-gray-700 mb-4">Aún no has registrado un local.</p>
+                    <button id="crearLocalButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                        Crear un Local
+                    </button>
+                </div>
+            `;
+            document.getElementById("crearLocalButton").addEventListener("click", () => {
+                window.location.href = "crear_local.html";
+            });
+        }
+
+        async function cargarReseñas(idLocal) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/comments/local/${idLocal}`);
+                const reseñas = await response.json();
+                const container = document.getElementById("reseñasContainer");
+
+                if (reseñas.length === 0) {
+                    container.innerHTML = `<p class="text-gray-700">No hay reseñas para mostrar.</p>`;
+                } else {
+                    const table = document.createElement("table");
+                    table.className = "min-w-full bg-white border";
+                    table.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2 border-b">Comentario</th>
+                                <th class="px-4 py-2 border-b">Fecha</th>
+                                <th class="px-4 py-2 border-b">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${reseñas.map(reseña => `
+                                <tr>
+                                    <td class="px-4 py-2 border-b">${reseña.comentario}</td>
+                                    <td class="px-4 py-2 border-b">${new Date(reseña.fecha).toLocaleDateString()}</td>
+                                    <td class="px-4 py-2 border-b">${reseña.usuario}</td>
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    `;
+                    container.appendChild(table);
+                }
+            } catch (error) {
+                console.error('Error al cargar reseñas:', error);
+                document.getElementById("reseñasContainer").innerHTML = `<p class="text-red-500">Error al cargar reseñas.</p>`;
+            }
+        }
+
+        function mostrarBotonMesas(idLocal) {
+            const container = document.getElementById("gestionMesas");
+            container.innerHTML = `
+                <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" onclick="window.location.href='mesas.html?idLocal=${idLocal}'">
+                    Gestionar Mesas
+                </button>
+            `;
+        }
+
+        document.getElementById("logoutButton").addEventListener("click", () => {
+            localStorage.removeItem("token");
+            window.location.href = "index.html";
+        });
+
+        cargarDatosUsuario();
+    </script>
+</body>
+</html>
