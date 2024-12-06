@@ -105,6 +105,9 @@
                                         <button class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600" title="Subir de rango" onclick="ascenderUsuario('${usuario._id}')">
                                             Subir de rango
                                         </button>
+                                        <button class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600" title=Bajar de rango" onclick="descenderUsuario('${usuario._id}')">
+                                            Bajar de rango
+                                        </button>
                                     </td>
                                 </tr>
                             `).join('')}
@@ -144,6 +147,23 @@
 
                 if (response.ok) {
                     mostrarAlerta('Usuario ascendido a locatario exitosamente.');
+                    cargarUsuarios(); // Recargar usuarios después de ascender
+                } else {
+                    const result = await response.json();
+                    alert(`Error: ${result.message}`);
+                }
+            } catch (error) {
+                console.error('Error al ascender usuario:', error);
+            }
+        }
+        async function descenderUsuario(id) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/users/${id}/descender`, {
+                    method: 'PUT',
+                });
+
+                if (response.ok) {
+                    mostrarAlerta('Usuario Descendio a Cliente exitosamente.');
                     cargarUsuarios(); // Recargar usuarios después de ascender
                 } else {
                     const result = await response.json();

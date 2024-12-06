@@ -124,4 +124,18 @@ const deleteLocal = async (req, res) => {
     }
 };
 
+// Obtener todos los locales
+const getLocals = async (req, res) => {
+    try {
+        const locals = await Local.find();  // Obtén los locales desde la base de datos
+
+        res.status(200).json(locals);  // Envía la respuesta con los locales
+    } catch (error) {
+        console.error('Error al obtener locales:', error);
+        res.status(500).json({ message: 'Error del servidor', error });
+    }
+};
+
+
+
 module.exports = { addLocal, getLocals, getLocalsByUserId, deleteLocal, getLocalById };

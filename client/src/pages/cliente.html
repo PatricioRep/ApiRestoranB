@@ -109,6 +109,9 @@
                 if (reseñas.length === 0) {
                     container.innerHTML = `<p class="text-gray-700">No tienes reseñas disponibles.</p>`;
                 } else {
+                    
+                    reseñas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
                     const table = document.createElement('table');
                     table.className = 'min-w-full bg-white border';
                     table.innerHTML = `
@@ -149,6 +152,8 @@
                 if (reservas.length === 0) {
                     container.innerHTML = `<p class="text-gray-700">No tienes reservas disponibles.</p>`;
                 } else {
+
+
                     const table = document.createElement('table');
                     table.className = 'min-w-full bg-white border';
                     table.innerHTML = `

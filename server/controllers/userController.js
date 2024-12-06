@@ -30,6 +30,25 @@ const promoteUser = async (req, res) => {
     }
 };
 
+// Descender usuario a Cliente
+const descenderUser = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const user = await User.findOne({ idUsuario: id });
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        user.perfil = 'Cliente'; // Cambiar perfil a locatario
+        await user.save();
+
+        res.status(200).json({ message: 'Usuario descendio a Cliente con éxito' });
+    } catch (error) {
+        console.error('Error al descender usuario:', error);
+        res.status(500).json({ message: 'Error al descender usuario' });
+    }
+};
+
 // Eliminar usuario
 const deleteUser = async (req, res) => {
     const { id } = req.params;
@@ -46,4 +65,4 @@ const deleteUser = async (req, res) => {
     }
 };
 
-module.exports = { getUsers, promoteUser, deleteUser };
+module.exports = { getUsers, promoteUser,descenderUser, deleteUser };

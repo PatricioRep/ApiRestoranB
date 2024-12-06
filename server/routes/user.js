@@ -29,6 +29,22 @@ router.put('/:id/promote', async (req, res) => {
   }
 });
 
+// Promover un usuario a Locatario
+router.put('/:id/descender', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    user.perfil = 'Cliente'; // Cambiar perfil a Cliente
+    await user.save();
+
+    res.status(200).json({ message: 'Usuario descendio a Cliente', user });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al descender al usuario', error });
+  }
+});
 // Eliminar un usuario
 router.delete('/:id', async (req, res) => {
   try {

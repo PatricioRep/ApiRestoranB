@@ -3,69 +3,99 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Opiniones de Restaurantes</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"> <!-- Tailwind CSS -->
-  <!-- Incluye tu archivo de estilos adicionales si es necesario -->
+  <title>InfoRes - Inicio</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-start">
-  <header class="w-full bg-blue-600 text-white p-4 text-center">
-    <h1 class="text-3xl font-bold">InfoRes Prototipo</h1>
-    <button id="loginButton" class="mt-4 bg-white text-blue-600 px-4 py-2 rounded hover:bg-blue-100">
-      Iniciar Sesión
-    </button>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+  <!-- Navbar -->
+  <header class="bg-blue-600 text-white p-4">
+    <div class="max-w-screen-xl mx-auto flex justify-between items-center">
+      <!-- Logo -->
+      <a href="/index.html" class="flex items-center space-x-3">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-8 w-8 text-white">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z" />
+        </svg>
+        <span class="text-2xl font-semibold">InfoRes</span>
+      </a>
+    </div>
   </header>
-  <main class="w-full max-w-3xl p-4 mt-4">
-    <section id="opiniones" class="space-y-4">
-      <!-- Las opiniones se cargarán aquí dinámicamente -->
+
+  <!-- Contenido Principal -->
+  <main class="flex-grow">
+    <!-- InfoRes Features -->
+    <section class="text-gray-600 body-font">
+      <div class="container px-5 py-24 mx-auto">
+        <div class="text-center mb-20">
+          <h1 class="sm:text-3xl text-2xl font-medium title-font text-gray-900 mb-4">¿Por qué elegir InfoRes?</h1>
+          <p class="text-base leading-relaxed xl:w-2/4 lg:w-3/4 mx-auto text-gray-500">
+            InfoRes es la solución perfecta para gestionar tus reservas y disfrutar de la mejor atención en tus locales favoritos.
+          </p>
+          <div class="flex mt-6 justify-center">
+            <div class="w-16 h-1 rounded-full bg-indigo-500 inline-flex"></div>
+          </div>
+        </div>
+        <div class="flex flex-wrap sm:-m-4 -mx-4 -mb-10 -mt-4 md:space-y-0 space-y-6">
+          <!-- Feature 1 -->
+          <div class="p-4 md:w-1/3 flex flex-col text-center items-center">
+            <div class="w-20 h-20 inline-flex items-center justify-center rounded-full bg-blue-100 text-blue-500 mb-5 flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
+              </svg>
+            </div>
+            <div class="flex-grow">
+              <h2 class="text-gray-900 text-lg title-font font-medium mb-3">Solicita!</h2>
+              <p class="leading-relaxed text-base">
+                Solicita tu mesa ahora mismo para poder tener la mejor atención del mercado en tu local preferido!
+              </p>
+            </div>
+          </div>
+          <!-- Feature 2 -->
+          <div class="p-4 md:w-1/3 flex flex-col text-center items-center">
+            <div class="w-20 h-20 inline-flex items-center justify-center rounded-full bg-blue-100 text-blue-500 mb-5 flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+            </div>
+            <div class="flex-grow">
+              <h2 class="text-gray-900 text-lg title-font font-medium mb-3">Eficaz!</h2>
+              <p class="leading-relaxed text-base">
+                Ahorra tus tiempos para reanudar tus actividades mientras esperas!
+              </p>
+            </div>
+          </div>
+          <!-- Feature 3 -->
+          <div class="p-4 md:w-1/3 flex flex-col text-center items-center">
+            <div class="w-20 h-20 inline-flex items-center justify-center rounded-full bg-blue-100 text-blue-500 mb-5 flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0 1 18 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3 1.5 1.5 3-3.75" />
+              </svg>
+            </div>
+            <div class="flex-grow">
+              <h2 class="text-gray-900 text-lg title-font font-medium mb-3">Confirma!</h2>
+              <p class="leading-relaxed text-base">
+                Espera la confirmación de tu locatario preferido!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Registro -->
+    <section class="text-gray-600 body-font">
+      <div class="container px-5 py-24 mx-auto text-center">
+        <h2 class="text-2xl font-medium title-font text-gray-900 mb-4">¡Crea tu usuario ahora!</h2>
+        <p class="text-base leading-relaxed xl:w-2/4 lg:w-3/4 mx-auto text-gray-500">
+          Regístrate para comenzar a disfrutar de los beneficios exclusivos de InfoRes.
+        </p>
+        <button class="mt-6 bg-blue-500 hover:bg-blue-600 text-white py-2 px-8 rounded" onclick="window.location.href='register.html'">
+          Registrarse
+        </button>
+        <div class="mt-4">
+          <a href="login.html" class="text-blue-500 hover:underline">Ya tengo un usuario</a>
+        </div>
+      </div>
     </section>
   </main>
-  <script>
-    // Botón de "Iniciar Sesión"
-    document.getElementById('loginButton').addEventListener('click', () => {
-      window.location.href = 'login.html'; // Redirige a la página de login
-    });
-
-    // Función para obtener todas las reseñas desde el backend
-    async function obtenerReseñas() {
-      try {
-        const response = await fetch('http://localhost:5000/api/comments/all');
-        if (!response.ok) {
-          throw new Error('Error al obtener las reseñas');
-        }
-        const reseñas = await response.json();
-        renderComentarios(reseñas);
-      } catch (error) {
-        console.error('Error:', error);
-        const opinionesContainer = document.getElementById('opiniones');
-        opinionesContainer.innerHTML = `<p class="text-red-500">Error al cargar las reseñas. Por favor, inténtalo más tarde.</p>`;
-      }
-    }
-
-    // Renderizar reseñas obtenidas en la página
-    function renderComentarios(comentarios) {
-      const opinionesContainer = document.getElementById('opiniones');
-      opinionesContainer.innerHTML = ''; // Limpiar cualquier contenido previo
-
-      if (comentarios.length === 0) {
-        opinionesContainer.innerHTML = '<p class="text-gray-600">No hay reseñas disponibles en este momento.</p>';
-        return;
-      }
-
-      comentarios.forEach(comentario => {
-        const comentarioCard = document.createElement('div');
-        comentarioCard.className = 'p-4 bg-white rounded shadow-md';
-        comentarioCard.innerHTML = `
-          <p class="font-semibold text-blue-600">Local: ${comentario.nombreLocal}</p>
-          <p>${comentario.comentario}</p>
-          <p class="text-sm text-gray-500"><strong>Por:</strong> ${comentario.nombreUsuario || 'Usuario desconocido'}</p>
-          <p class="text-xs text-gray-400"><strong>Fecha:</strong> ${new Date(comentario.fecha).toLocaleDateString()}</p>
-        `;
-        opinionesContainer.appendChild(comentarioCard);
-      });
-    }
-
-    // Llamar a la función para obtener y renderizar las reseñas al cargar la página
-    obtenerReseñas();
-  </script>
 </body>
 </html>
