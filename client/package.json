@@ -7,8 +7,11 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "client": "file:",
+<<<<<<< HEAD
     "mapbox": "^1.0.0-beta10",
     "mapkick": "^0.2.6",
+=======
+>>>>>>> 107e1e3b7bb5182f2cfb7e388495799d5eb55896
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-scripts": "5.0.1",

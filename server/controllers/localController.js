@@ -11,6 +11,7 @@ const generarIdLocal = async () => {
     } while (existe);
     return idLocal;
 };
+<<<<<<< HEAD
 //Agregar un local
 const axios = require('axios');  // Asegúrate de tener axios importado
 
@@ -24,6 +25,16 @@ const addLocal = async (req, res) => {
 
     try {
         if (!idUsuario || !nombreLocal || !region || !ubicacion || !descripcion) {
+=======
+
+// Agregar un local
+const addLocal = async (req, res) => {
+    const { idUsuario, nombreLocal, region } = req.body;
+    const imagenLocal = req.file ? `/uploads/${req.file.filename}` : null; // Obtener la ruta completa de la imagen
+
+    try {
+        if (!idUsuario || !nombreLocal || !region) {
+>>>>>>> 107e1e3b7bb5182f2cfb7e388495799d5eb55896
             return res.status(400).json({ message: 'Todos los campos son obligatorios' });
         }
 
@@ -32,6 +43,7 @@ const addLocal = async (req, res) => {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
+<<<<<<< HEAD
         // Solicitar coordenadas de la ubicación usando LocationIQ        
         try {
             const geoResponse = await axios.get(`https://us1.locationiq.com/v1/search?key=pk.8e44377563a5b42f85f78f251f668d95&q=${encodeURIComponent(ubicacion)}&format=json`);
@@ -61,6 +73,12 @@ const addLocal = async (req, res) => {
         });
 
         await newLocal.save();
+=======
+        const idLocal = await generarIdLocal(); // Generar un idLocal único
+        const newLocal = new Local({ idUsuario, idLocal, nombreLocal, region, imagenLocal });
+        await newLocal.save();
+
+>>>>>>> 107e1e3b7bb5182f2cfb7e388495799d5eb55896
         res.status(201).json({ message: 'Local añadido con éxito', local: newLocal });
     } catch (error) {
         console.error('Error al agregar local:', error);
@@ -68,10 +86,13 @@ const addLocal = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
 
 
 
 
+=======
+>>>>>>> 107e1e3b7bb5182f2cfb7e388495799d5eb55896
 // Obtener todos los locales
 const getLocals = async (req, res) => {
     try {

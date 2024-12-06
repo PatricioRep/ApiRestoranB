@@ -7,6 +7,7 @@ const localSchema = new mongoose.Schema({
     region: { type: String, required: true },
     fechaCreacion: { type: Date, default: Date.now },
     imagenLocal: { type: String, default: null }, // Nuevo campo para la imagen del local
+<<<<<<< HEAD
     ubicacion: { type: String, required: true },
     descripcion: { type: String, required: true },
     coordenadas: {
@@ -17,4 +18,8 @@ const localSchema = new mongoose.Schema({
 });
 
 
+=======
+});
+
+>>>>>>> 107e1e3b7bb5182f2cfb7e388495799d5eb55896
 module.exports = mongoose.model('Local', localSchema);
