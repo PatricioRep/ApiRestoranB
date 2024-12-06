@@ -11,26 +11,24 @@
   "description": "",
   "dependencies": {
     "apirestoran": "file:",
-<<<<<<< HEAD
+
     "axios": "^1.7.9",
-=======
->>>>>>> 107e1e3b7bb5182f2cfb7e388495799d5eb55896
+
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
-<<<<<<< HEAD
+
     "git": "^0.1.5",
     "github": "^14.0.0",
     "jsonwebtoken": "^9.0.2",
     "mapbox": "^1.0.0-beta10",
     "mapkick": "^0.2.6",
     "mongoose": "^8.8.0",
-    "multer": "^1.4.5-lts.1"
-=======
+    "multer": "^1.4.5-lts.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.0"
->>>>>>> 107e1e3b7bb5182f2cfb7e388495799d5eb55896
+
   },
   "devDependencies": {
     "tailwindcss": "^3.4.14"

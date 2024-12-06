@@ -11,7 +11,6 @@ const generarIdLocal = async () => {
     } while (existe);
     return idLocal;
 };
-<<<<<<< HEAD
 //Agregar un local
 const axios = require('axios');  // Asegúrate de tener axios importado
 
@@ -24,26 +23,17 @@ const addLocal = async (req, res) => {
     let coordenadas = null;  // Inicializar coordenadas en null
 
     try {
+        // Verificar que todos los campos sean proporcionados
         if (!idUsuario || !nombreLocal || !region || !ubicacion || !descripcion) {
-=======
-
-// Agregar un local
-const addLocal = async (req, res) => {
-    const { idUsuario, nombreLocal, region } = req.body;
-    const imagenLocal = req.file ? `/uploads/${req.file.filename}` : null; // Obtener la ruta completa de la imagen
-
-    try {
-        if (!idUsuario || !nombreLocal || !region) {
->>>>>>> 107e1e3b7bb5182f2cfb7e388495799d5eb55896
             return res.status(400).json({ message: 'Todos los campos son obligatorios' });
         }
 
+        // Verificar si el usuario existe
         const user = await User.findOne({ idUsuario });
         if (!user) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
-<<<<<<< HEAD
         // Solicitar coordenadas de la ubicación usando LocationIQ        
         try {
             const geoResponse = await axios.get(`https://us1.locationiq.com/v1/search?key=pk.8e44377563a5b42f85f78f251f668d95&q=${encodeURIComponent(ubicacion)}&format=json`);
@@ -59,7 +49,10 @@ const addLocal = async (req, res) => {
             return res.status(500).json({ message: 'Error al obtener las coordenadas de la ubicación', error });
         }
 
-        const idLocal = await generarIdLocal(); // Generar un idLocal único
+        // Generar un id único para el local
+        const idLocal = await generarIdLocal(); 
+
+        // Crear el nuevo local
         const newLocal = new Local({
             idUsuario,
             idLocal,
@@ -72,35 +65,14 @@ const addLocal = async (req, res) => {
             estado: true  // Estado siempre verdadero
         });
 
-        await newLocal.save();
-=======
-        const idLocal = await generarIdLocal(); // Generar un idLocal único
-        const newLocal = new Local({ idUsuario, idLocal, nombreLocal, region, imagenLocal });
+        // Guardar el local en la base de datos
         await newLocal.save();
 
->>>>>>> 107e1e3b7bb5182f2cfb7e388495799d5eb55896
+        // Enviar respuesta de éxito
         res.status(201).json({ message: 'Local añadido con éxito', local: newLocal });
+
     } catch (error) {
         console.error('Error al agregar local:', error);
-        res.status(500).json({ message: 'Error del servidor', error });
-    }
-};
-
-<<<<<<< HEAD
-
-
-
-
-=======
->>>>>>> 107e1e3b7bb5182f2cfb7e388495799d5eb55896
-// Obtener todos los locales
-const getLocals = async (req, res) => {
-    try {
-        const locals = await Local.find();
-
-        res.status(200).json(locals);
-    } catch (error) {
-        console.error('Error al obtener locales:', error);
         res.status(500).json({ message: 'Error del servidor', error });
     }
 };

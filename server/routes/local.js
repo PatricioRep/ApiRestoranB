@@ -18,11 +18,11 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-<<<<<<< HEAD
+
 //Configuración de multer para subir imágenes
-=======
+
 // Configuración de multer para subir imágenes
->>>>>>> 107e1e3b7bb5182f2cfb7e388495799d5eb55896
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, uploadDir); // Carpeta donde se guardan las imágenes
@@ -31,10 +31,7 @@ const storage = multer.diskStorage({
         cb(null, `${Date.now()}-${file.originalname}`);
     },
 });
-<<<<<<< HEAD
-=======
 
->>>>>>> 107e1e3b7bb5182f2cfb7e388495799d5eb55896
 const upload = multer({ storage });
 
 // Ruta para agregar un local con imagen
@@ -47,10 +44,7 @@ router.post('/add', upload.single('imagenLocal'), async (req, res, next) => {
     }
 });
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 107e1e3b7bb5182f2cfb7e388495799d5eb55896
 // Ruta para obtener todos los locales
 router.get('/all', async (req, res, next) => {
     try {
