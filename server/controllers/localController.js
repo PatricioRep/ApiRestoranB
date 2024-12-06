@@ -11,14 +11,19 @@ const generarIdLocal = async () => {
     } while (existe);
     return idLocal;
 };
+//Agregar un local
+const axios = require('axios');  // Asegúrate de tener axios importado
 
-// Agregar un local
 const addLocal = async (req, res) => {
-    const { idUsuario, nombreLocal, region } = req.body;
-    const imagenLocal = req.file ? `/uploads/${req.file.filename}` : null; // Obtener la ruta completa de la imagen
+    const { idUsuario, nombreLocal, region, ubicacion, descripcion } = req.body;
+    console.log('Datos recibidos:', req.body); // Depuración
+
+    const imagenLocal = req.file ? `${req.file.filename}` : null;
+
+    let coordenadas = null;  // Inicializar coordenadas en null
 
     try {
-        if (!idUsuario || !nombreLocal || !region) {
+        if (!idUsuario || !nombreLocal || !region || !ubicacion || !descripcion) {
             return res.status(400).json({ message: 'Todos los campos son obligatorios' });
         }
 
@@ -27,16 +32,45 @@ const addLocal = async (req, res) => {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
-        const idLocal = await generarIdLocal(); // Generar un idLocal único
-        const newLocal = new Local({ idUsuario, idLocal, nombreLocal, region, imagenLocal });
-        await newLocal.save();
+        // Solicitar coordenadas de la ubicación usando LocationIQ        
+        try {
+            const geoResponse = await axios.get(`https://us1.locationiq.com/v1/search?key=pk.8e44377563a5b42f85f78f251f668d95&q=${encodeURIComponent(ubicacion)}&format=json`);
+            console.log('Respuesta de LocationIQ:', geoResponse.data);  // Depuración de la respuesta
+            if (geoResponse.data && geoResponse.data.length > 0) {
+                const { lat, lon } = geoResponse.data[0];
+                coordenadas = { lat, lon };
+            } else {
+                return res.status(400).json({ message: 'No se pudo obtener las coordenadas de la ubicación proporcionada' });
+            }
+        } catch (error) {
+            console.error('Error al obtener las coordenadas:', error.response ? error.response.data : error.message);
+            return res.status(500).json({ message: 'Error al obtener las coordenadas de la ubicación', error });
+        }
 
+        const idLocal = await generarIdLocal(); // Generar un idLocal único
+        const newLocal = new Local({
+            idUsuario,
+            idLocal,
+            nombreLocal,
+            region,
+            imagenLocal,
+            ubicacion,
+            descripcion,
+            coordenadas,  // Ahora coordenadas es definida
+            estado: true  // Estado siempre verdadero
+        });
+
+        await newLocal.save();
         res.status(201).json({ message: 'Local añadido con éxito', local: newLocal });
     } catch (error) {
         console.error('Error al agregar local:', error);
         res.status(500).json({ message: 'Error del servidor', error });
     }
 };
+
+
+
+
 
 // Obtener todos los locales
 const getLocals = async (req, res) => {

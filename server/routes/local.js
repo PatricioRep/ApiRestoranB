@@ -40,8 +40,6 @@ router.post('/add', upload.single('imagenLocal'), async (req, res, next) => {
 });
 
 
-
-
 // Ruta para obtener todos los locales
 router.get('/all', async (req, res, next) => {
     try {

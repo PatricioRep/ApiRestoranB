@@ -5,13 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalles</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.css" rel="stylesheet" />
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.css" rel="stylesheet" />
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.js"></script>
-    <script src="mapkick.js"></script>
-    <script>
-      mapboxgl.accessToken = "YOUR-TOKEN"
-    </script>
+    
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
+
     <style>
         .image-container {
             position: relative;
@@ -38,6 +35,23 @@
         .image-container:hover .overlay {
             opacity: 1;
         }
+        table {
+            width: 80%;  /* Ancho de la tabla */
+            margin: 20px auto;  /* Centrar la tabla en la página */
+            border-collapse: collapse;  /* Fusiona los bordes */
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);  /* Sombra en la tabla */
+        }
+        th, td {
+            padding: 12px;  /* Espaciado interno de las celdas */
+            text-align: center;  /* Alineación del texto a la izquierda */
+            border: 1px solid #ddd;  /* Borde suave */
+            
+        }
+        h1 {
+            font-weight: bold;
+            font-size: 20px;
+        }
+        
     </style>
 </head>
 <body class="bg-gray-200 min-h-screen">
@@ -54,10 +68,87 @@
                 Volver
             </button>
         </div>
-    <div>
-       <p>
-        
-       </p> 
-    <dib/>
+
+        <table>
+            <thead>
+              <tr>
+                <th>
+                    <h1 id="nombreLocal">Detalles del Local</h1>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                    <h1>Ubicación:</h1>
+                    <p id="ubicacionLocal">Cargando ubicación...</p>
+                    <div id='map' name="map" style='width: auto; margin: 10px; height: 500px;'></div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                    <h1>Descripción</h1>
+                    <p id="descripcionLocal">Cargando descripción...</p>
+                </td>
+              </tr>
+            </tbody>
+        </table>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoibWF5YmVicnVubyIsImEiOiJjbTRjMDQxc3owNWs0MmtvbzhpZm8zZGs3In0.Q2u5-yd7yPuT00P-xLve8w';
+
+        // Función para obtener los detalles del local por ID
+        async function obtenerDetallesLocal(viewLocalId) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/local/${viewLocalId}`);
+                if (response.ok) {
+                    return await response.json();
+                } else {
+                    console.error('Error al obtener detalles del local:', await response.text());
+                    return null;
+                }
+            } catch (error) {
+                console.error('Error en la solicitud:', error);
+                return null;
+            }
+        }
+
+        // Inicializar la página
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Obtener el ID del local desde el almacenamiento local
+
+            const viewLocalId = localStorage.getItem('viewLocalId');
+            if (!viewLocalId) {
+                alert('No se encontró el ID.');
+                return;
+            }
+
+
+            // Obtener los detalles del local
+            const detallesLocal = await obtenerDetallesLocal(viewLocalId);
+            if (!detallesLocal) {
+                alert('No se pudieron cargar los detalles del local.');
+                return;
+            }
+
+            // Actualizar la página con los datos del local
+            document.getElementById('nombreLocal').textContent = `Detalles del Local: ${detallesLocal.nombreLocal}`;
+            document.getElementById('ubicacionLocal').textContent = detallesLocal.ubicacion;
+            document.getElementById('descripcionLocal').textContent = detallesLocal.descripcion;
+
+            // Configurar el mapa con las coordenadas del local
+            const { lat, lon } = detallesLocal.coordenadas;
+            const map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/streets-v11',
+                center: [lon, lat],
+                zoom: 16
+            });
+
+            // Agregar marcador al mapa
+            new mapboxgl.Marker()
+                .setLngLat([lon, lat])
+                .addTo(map);
+        });
+    </script>
 </body>
 </html>
